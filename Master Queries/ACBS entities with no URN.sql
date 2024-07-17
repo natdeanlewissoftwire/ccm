@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'ACBS records with Party URN not present in any SF record'
+SELECT COUNT(*) as 'ACBS entities with no URN'
 FROM (
     SELECT DISTINCT
         customer.source,
@@ -14,20 +14,9 @@ FROM (
             AND facility_party.facility_ods_key = facility.ods_key
     WHERE customer.source ='ACBS'
         AND facility.facility_status_description = 'ACTIVE ACCOUNT'
-        -- Excludes UKEF
         AND customer.customer_code <> '00000000'
-        -- Remove deleted records
         AND customer.change_type <> 'D'
         AND facility_party.change_type <> 'D'
         AND facility.change_type <> 'D'
 ) as acbs_customers
-WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
-    AND NOT EXISTS (
-    SELECT *
-    FROM [ODS].[dbo].[customer] sf_customers
-    WHERE sf_customers.source IN ('SalesForce', 'SalesforceLegacy')
-        AND sf_customers.customer_party_unique_reference_number = acbs_customers.customer_party_unique_reference_number
-)
-
-
--- should this be a name comparison as well?
+WHERE customer_party_unique_reference_number IS NULL;

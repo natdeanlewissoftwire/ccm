@@ -2,20 +2,20 @@
 -- FROM ( 
 -- SELECT customer_party_unique_reference_number, COUNT(customer_party_unique_reference_number) as 'number_of_records'
 --     FROM [ODS].[dbo].[customer]
---     WHERE source IN ('SalesForce', 'SalesforceLegacy')
+--     WHERE source IN ('SalesForce')
 --     GROUP BY customer_party_unique_reference_number
 --     HAVING COUNT(customer_party_unique_reference_number) > 1
--- ) as dt
+-- ) as groups
 
 
 SELECT COUNT(*) AS 'Non-unique Salesforce Party URNs'
 FROM ( 
 SELECT customer_party_unique_reference_number, COUNT(customer_party_unique_reference_number) as 'number_of_records'
     FROM [ODS].[dbo].[customer]
-    WHERE source IN ('SalesForce', 'SalesforceLegacy')
+    WHERE source IN ('SalesForce')
     GROUP BY customer_party_unique_reference_number
     HAVING COUNT(customer_party_unique_reference_number) > 1
-) as groups
+) as groups;
 
 -- order desc:
 --   ORDER BY COUNT(customer_party_unique_reference_number) DESC

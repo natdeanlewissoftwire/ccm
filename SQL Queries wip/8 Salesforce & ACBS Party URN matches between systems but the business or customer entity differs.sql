@@ -9,7 +9,7 @@ WITH
             REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(customer_name), ' ', ''), '.', ''), ',', ''), '''', ''), '-', ''), '/', ''), '(', ''), ')', ''), 'LIMITED', ''), 'LTD', ''), 'PLC', ''), 'INCORPORATED', ''), 'INC', ''), 'LLC', ''), 'COMPANY', ''), 'CORPORATION', ''), 'CORP', ''), 'CO', ''), 'GMBH', ''), 'UK', ''), '&', 'AND'), 'AND', ''), 'THE', '')
                 AS cleaned_name
         FROM [ODS].[dbo].[customer]
-        WHERE source IN ('SalesForce','SalesforceLegacy')
+        WHERE source IN ('SalesForce')
             AND customer_party_unique_reference_number IS NOT NULL
     ),
     acbs_cleaned_names
@@ -36,9 +36,7 @@ WITH
                     AND facility_party.facility_ods_key = facility.ods_key
             WHERE customer.source ='ACBS'
                 AND facility.facility_status_description = 'ACTIVE ACCOUNT'
-                -- Excludes UKEF
                 AND customer.customer_code <> '00000000'
-                -- Remove deleted records
                 AND customer.change_type <> 'D'
                 AND facility_party.change_type <> 'D'
                 AND facility.change_type <> 'D'
@@ -57,12 +55,12 @@ FROM acbs_cleaned_names acbs_customers
     JOIN sf_cleaned_names sf_customers
     ON acbs_customers.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
 WHERE acbs_customers.source = 'ACBS'
-    AND sf_customers.source IN ('SalesForce', 'SalesforceLegacy')
+    AND sf_customers.source IN ('SalesForce')
     -- cleaned names different:
     AND acbs_customers.cleaned_name <> sf_customers.cleaned_name
 
     -- cleaned names not substrings of each other:
-    AND CHARINDEX(acbs_customers.cleaned_name, sf_customers.cleaned_name) + CHARINDEX(sf_customers.cleaned_name, acbs_customers.cleaned_name) = 0
+    AND CHARINDEX(acbs_customers.cleaned_name, sf_customers.cleaned_name) + CHARINDEX(sf_customers.cleaned_name, acbs_customers.cleaned_name) = 0;
 
 
 -- SELECT acbs_customers.source, acbs_customers.customer_name, sf_customers.source, sf_customers.customer_name,replaced_acbs_record.cleaned_name,
@@ -75,7 +73,7 @@ WHERE acbs_customers.source = 'ACBS'
 -- ON acbs_customers.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
 -- WHERE acbs_customers.source = 'ACBS'
 -- AND acbs_customers.customer_party_unique_reference_number IS NOT NULL
--- AND sf_customers.source IN ('SalesForce', 'SalesforceLegacy')
+-- AND sf_customers.source IN ('SalesForce')
 -- AND sf_customers.customer_party_unique_reference_number IS NOT NULL
 -- AND 
 -- REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(acbs_customers.customer_name)
@@ -104,3 +102,4 @@ WHERE acbs_customers.source = 'ACBS'
 -- REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(acbs_customers.customer_name)
 -- , ' ', ''), '.', ''), ',', ''), '-', ''), '/', ''), '(', ''), ')', ''), 'LIMITED', ''), 'LTD', ''), 'PLC', ''), 'INCORPORATED', ''), 'INC', ''), 'LLC', ''), 'COMPANY', ''), 'CORPORATION', ''), 'CORP', ''), 'CO', ''), 'GMBH', ''), 'UK', ''), '&', 'AND'), 'AND', ''), 'THE', '')
 -- ) = 0 
+

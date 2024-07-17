@@ -14,9 +14,7 @@ FROM (
             AND facility_party.facility_ods_key = facility.ods_key
     WHERE customer.source ='ACBS'
         AND facility.facility_status_description = 'ACTIVE ACCOUNT'
-        -- Excludes UKEF
         AND customer.customer_code <> '00000000'
-        -- Remove deleted records
         AND customer.change_type <> 'D'
         AND facility_party.change_type <> 'D'
         AND facility.change_type <> 'D'
@@ -45,9 +43,7 @@ FROM (
             AND facility_party.facility_ods_key = facility.ods_key
     WHERE customer.source ='ACBS'
         AND facility.facility_status_description = 'ACTIVE ACCOUNT'
-        -- Excludes UKEF
         AND customer.customer_code <> '00000000'
-        -- Remove deleted records
         AND customer.change_type <> 'D'
         AND facility_party.change_type <> 'D'
         AND facility.change_type <> 'D'
@@ -64,7 +60,7 @@ WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
     FROM [ODS].[dbo].[customer] sf_customers
     WHERE sf_customers.source = 'SalesForce'
         AND sf_customers.customer_party_unique_reference_number = acbs_customers.customer_party_unique_reference_number
-)
+);
 
 
 -- don't care about this, we're just treating SF and SF legacy as both valid sources
