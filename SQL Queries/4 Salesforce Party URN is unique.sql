@@ -1,11 +1,11 @@
-SELECT SUM(number_of_records) AS 'Non-unique Salesforce records by Party URN'
-FROM ( 
-SELECT customer_party_unique_reference_number, COUNT(customer_party_unique_reference_number) as 'number_of_records'
-    FROM [ODS].[dbo].[customer]
-    WHERE source IN ('SalesForce', 'SalesforceLegacy')
-    GROUP BY customer_party_unique_reference_number
-    HAVING COUNT(customer_party_unique_reference_number) > 1
-) as groups
+-- SELECT SUM(number_of_records) AS 'Non-unique Salesforce records by Party URN'
+-- FROM ( 
+-- SELECT customer_party_unique_reference_number, COUNT(customer_party_unique_reference_number) as 'number_of_records'
+--     FROM [ODS].[dbo].[customer]
+--     WHERE source IN ('SalesForce', 'SalesforceLegacy')
+--     GROUP BY customer_party_unique_reference_number
+--     HAVING COUNT(customer_party_unique_reference_number) > 1
+-- ) as dt
 
 
 SELECT COUNT(*) AS 'Non-unique Salesforce Party URNs'
