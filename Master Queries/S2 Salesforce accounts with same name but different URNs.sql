@@ -8,9 +8,18 @@ WITH
             customer_party_unique_reference_number,
             REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(customer_name), ' ', ''), '.', ''), ',', ''), '''', ''), '-', ''), '/', ''), '(', ''), ')', ''), 'LIMITED', ''), 'LTD', ''), 'PLC', ''), 'INCORPORATED', ''), 'INC', ''), 'LLC', ''), 'COMPANY', ''), 'CORPORATION', ''), 'CORP', ''), '&', 'AND')
                 AS cleaned_name
-        FROM [ODS].[dbo].[customer]
-        WHERE source IN ('SalesForce')
-            AND customer_party_unique_reference_number IS NOT NULL
+        FROM (
+            SELECT DISTINCT
+                customer.source,
+                customer.customer_code,
+                customer.customer_party_unique_reference_number,
+                customer.customer_name
+            FROM [ODS].[dbo].[customer] customer
+            WHERE customer.source IN ('SalesForce')
+                AND customer.customer_code <> '00000000'
+                AND customer.change_type <> 'D'
+            ) as sf_customers
+        WHERE customer_party_unique_reference_number IS NOT NULL
     )
 SELECT
     COUNT(*) AS 'Salesforce accounts with same name but different URNs'

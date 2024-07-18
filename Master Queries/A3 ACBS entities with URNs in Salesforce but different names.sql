@@ -22,8 +22,18 @@ WITH
             customer_name,
             customer_party_unique_reference_number,
             cleaned_name
-        FROM cleaned_names
-        WHERE source IN ('SalesForce')
+        FROM (
+            SELECT DISTINCT
+                cleaned_names.source,
+                cleaned_names.customer_code,
+                cleaned_names.customer_party_unique_reference_number,
+                cleaned_names.customer_name,
+                cleaned_names.cleaned_name
+            FROM cleaned_names
+            WHERE cleaned_names.source IN ('SalesForce')
+                AND cleaned_names.customer_code <> '00000000'
+                AND cleaned_names.change_type <> 'D'
+    ) as sf_customers
     ),
     acbs_cleaned_names
     AS
@@ -34,7 +44,7 @@ WITH
             customer_party_unique_reference_number,
             cleaned_name
         FROM (
-    SELECT DISTINCT
+            SELECT DISTINCT
                 cleaned_names.source,
                 cleaned_names.customer_code,
                 cleaned_names.customer_party_unique_reference_number,
