@@ -71,4 +71,4 @@ SELECT
 FROM acbs_cleaned_names acbs_customers
     JOIN sf_cleaned_names sf_customers
     ON acbs_customers.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
-WHERE acbs_customers.cleaned_name <> sf_customers.cleaned_name
+WHERE acbs_customers.cleaned_name <> sf_customers.cleaned_name;
