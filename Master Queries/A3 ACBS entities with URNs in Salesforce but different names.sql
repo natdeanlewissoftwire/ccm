@@ -57,7 +57,7 @@ WITH
                 JOIN [ODS].[dbo].[facility] facility
                 ON facility_party.source = facility.source
                     AND facility_party.facility_ods_key = facility.ods_key
-            WHERE cleaned_names.source ='ACBS'
+            WHERE cleaned_names.source = 'ACBS'
                 AND facility.facility_status_description = 'ACTIVE ACCOUNT'
                 AND cleaned_names.customer_code <> '00000000'
                 AND cleaned_names.change_type <> 'D'

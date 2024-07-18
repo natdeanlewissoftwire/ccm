@@ -9,8 +9,10 @@ FROM (
             customer.customer_name
         FROM [ODS].[dbo].[customer] customer
         WHERE customer.source IN ('SalesForce')
-            AND customer.customer_code <> '00000000'
-            AND customer.change_type <> 'D'
+            --  exclude UKEF records
+        AND customer.customer_code <> '00000000'
+            --  exclude deleted records
+        AND customer.change_type <> 'D'
         ) as sf_customers
     GROUP BY customer_party_unique_reference_number
     HAVING COUNT(customer_party_unique_reference_number) > 1

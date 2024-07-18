@@ -34,10 +34,12 @@ WITH
                 JOIN [ODS].[dbo].[facility] facility
                 ON facility_party.source = facility.source
                     AND facility_party.facility_ods_key = facility.ods_key
-            WHERE customer.source ='ACBS'
+            WHERE customer.source = 'ACBS'
                 AND facility.facility_status_description = 'ACTIVE ACCOUNT'
-                AND customer.customer_code <> '00000000'
-                AND customer.change_type <> 'D'
+                --  exclude UKEF records
+        AND customer.customer_code <> '00000000'
+                --  exclude deleted records
+        AND customer.change_type <> 'D'
                 AND facility_party.change_type <> 'D'
                 AND facility.change_type <> 'D'
         ) as acbs_customers
