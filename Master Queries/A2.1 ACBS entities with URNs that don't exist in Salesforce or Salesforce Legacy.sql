@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'ACBS entities with URNs that don’t exist in Salesforce'
+SELECT COUNT(*) as 'ACBS records with Party URN present that are present in neither a SalesForce record nor a SalesforceLegacy record'
 FROM (
     SELECT DISTINCT
         customer.source,
@@ -22,6 +22,12 @@ FROM (
         AND facility.change_type <> 'D'
 ) as acbs_customers
 WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
+    AND NOT EXISTS (
+    SELECT *
+    FROM [ODS].[dbo].[customer] sf_customers
+    WHERE sf_customers.source = 'SalesforceLegacy'
+        AND sf_customers.customer_party_unique_reference_number = acbs_customers.customer_party_unique_reference_number
+)
     AND NOT EXISTS (
     SELECT *
     FROM [ODS].[dbo].[customer] sf_customers
