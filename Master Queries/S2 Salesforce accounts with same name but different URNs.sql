@@ -10,14 +10,14 @@ WITH
             ' ' + 
             REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
             UPPER(customer_name)
-            -- turn multiple spaces (up to 16 in a row) into a single space
-            ,'  ',' '),'  ',' '),'  ',' '),'  ',' ')
             -- remove common punctuation
             , '.', ''), ',', ''), '''', ''), '-', ''), '/', ''), '(', ''), ')', '')
             -- remove common terms
             , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', '')
             -- standardise &
             , ' & ', ' AND ')
+            -- turn multiple spaces (up to 16 in a row) into a single space
+            ,'  ',' '),'  ',' '),'  ',' '),'  ',' ')
             + ' '
             AS cleaned_name
         FROM (
