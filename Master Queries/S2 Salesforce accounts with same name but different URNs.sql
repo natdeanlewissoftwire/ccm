@@ -6,7 +6,16 @@ WITH
             source,
             customer_name,
             customer_party_unique_reference_number,
-            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(customer_name), ' ', ''), '.', ''), ',', ''), '''', ''), '-', ''), '/', ''), '(', ''), ')', ''), 'LIMITED', ''), 'LTD', ''), 'PLC', ''), 'INCORPORATED', ''), 'INC', ''), 'LLC', ''), 'COMPANY', ''), 'CORPORATION', ''), 'CORP', ''), '&', 'AND')
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+            UPPER(customer_name)
+            --turn multiple spaces (up to 16 in a row) into a single space
+            ,'  ',' '),'  ',' '),'  ',' '),'  ',' ')
+            -- remove common punctuation
+            , '.', ''), ',', ''), '''', ''), '-', ''), '/', ''), '(', ''), ')', '')
+            -- remove common terms
+            , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', '')
+            -- standardise &
+            , '&', ' AND')
                 AS cleaned_name
         FROM (
             SELECT DISTINCT
@@ -17,9 +26,9 @@ WITH
             FROM [ODS].[dbo].[customer] customer
             WHERE customer.source IN ('SalesForce')
                 --  exclude UKEF records
-        AND customer.customer_code <> '00000000'
+                AND customer.customer_code <> '00000000'
                 --  exclude deleted records
-        AND customer.change_type <> 'D'
+                AND customer.change_type <> 'D'
             ) as sf_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
     )
