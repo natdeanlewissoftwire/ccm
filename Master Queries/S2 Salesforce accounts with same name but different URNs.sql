@@ -8,7 +8,7 @@ WITH
             customer_party_unique_reference_number,
             REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
             UPPER(customer_name)
-            --turn multiple spaces (up to 16 in a row) into a single space
+            -- turn multiple spaces (up to 16 in a row) into a single space
             ,'  ',' '),'  ',' '),'  ',' '),'  ',' ')
             -- remove common punctuation
             , '.', ''), ',', ''), '''', ''), '-', ''), '/', ''), '(', ''), ')', '')
