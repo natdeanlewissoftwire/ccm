@@ -6,19 +6,19 @@ WITH
             source,
             customer_name,
             customer_party_unique_reference_number,
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
             -- surround with spaces for CHARINDEX substring checks later on
             ' ' + 
-            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
             UPPER(customer_name)
-            -- remove common punctuation
-            , '.', ''), ',', ''), '''', ''), '-', ''), '/', ''), '(', ''), ')', '')
+            + ' '
+            -- replace common punctuation with spaces
+            , '.', ' '), ',', ' '), '''', ' '), '-', ' '), '/', ' '), '(', ' '), ')', ' ')
             -- remove common terms
             , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', '')
             -- standardise &
             , ' & ', ' AND ')
-            -- turn multiple spaces (up to 16 in a row) into a single space
-            ,'  ',' '),'  ',' '),'  ',' '),'  ',' ')
-            + ' '
+            -- turn multiple spaces (up to 32 consecutive) into a single space
+            ,'  ',' '),'  ',' '),'  ',' '),'  ',' '),'  ',' ')
             AS cleaned_name
         FROM (
             SELECT DISTINCT
