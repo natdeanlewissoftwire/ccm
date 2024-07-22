@@ -17,7 +17,7 @@ WITH
             -- remove common terms
             , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', '')
             -- standardise &
-            , ' &', ' AND')
+            , ' & ', ' AND ')
             + ' '
             AS cleaned_name
         FROM (
