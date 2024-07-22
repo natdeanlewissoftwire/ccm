@@ -6,6 +6,8 @@ WITH
             source,
             customer_name,
             customer_party_unique_reference_number,
+            -- surround with spaces for CHARINDEX substring checks later on
+            ' ' + 
             REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
             UPPER(customer_name)
             -- turn multiple spaces (up to 16 in a row) into a single space
@@ -15,8 +17,9 @@ WITH
             -- remove common terms
             , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', '')
             -- standardise &
-            , '&', ' AND')
-                AS cleaned_name
+            , ' &', ' AND')
+            + ' '
+            AS cleaned_name
         FROM (
             SELECT DISTINCT
                 customer.source,
