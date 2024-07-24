@@ -73,4 +73,5 @@ WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
 
 -- if there's an active record in legacy, we want to convert that to a latest sf account
 
+-- should be a subset of the 1457 in andy's flow
 
