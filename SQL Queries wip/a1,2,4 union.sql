@@ -26,61 +26,141 @@ WITH
             AS cleaned_name
         FROM [ODS].[dbo].[customer]
     ),
-    acbs_cleaned_names
-    AS
-    (
-        SELECT
-            source,
-            customer_name,
-            customer_party_unique_reference_number,
-            cleaned_name,
-            customer_code
-        FROM (
-            SELECT DISTINCT
-                cleaned_names.source,
-                cleaned_names.customer_code,
-                cleaned_names.customer_party_unique_reference_number,
-                cleaned_names.customer_name,
-                cleaned_names.cleaned_name
-            FROM cleaned_names
-            WHERE cleaned_names.source IN ('ACBS')
-                AND cleaned_names.customer_code <> '00000000'
-                AND cleaned_names.change_type <> 'D'
-    ) AS acbs_customers
-    WHERE customer_code IN ('00000352',
-'00227814',
-'00224708',
-'00222465',
-'00206972',
-'00232461',
-'00000348',
-'00291482',
-'00240504',
-'00271245',
-'00240324',
-'00236724')
-    ),
-    disctinct_urns
+    acbs_active
     AS
     (
         SELECT DISTINCT
-            -- acbs_cleaned_names_1.customer_name,
-            -- acbs_cleaned_names_2.customer_name,
-            -- acbs_cleaned_names_1.cleaned_name,
-            -- acbs_cleaned_names_2.cleaned_name,
-            acbs_cleaned_names_1.customer_code
-        -- acbs_cleaned_names_2.customer_code
-        FROM acbs_cleaned_names acbs_cleaned_names_1
-            JOIN acbs_cleaned_names acbs_cleaned_names_2
-            ON (acbs_cleaned_names_1.cleaned_name = acbs_cleaned_names_2.cleaned_name
-                OR CHARINDEX(acbs_cleaned_names_1.cleaned_name, acbs_cleaned_names_2.cleaned_name) + CHARINDEX(acbs_cleaned_names_2.cleaned_name, acbs_cleaned_names_1.cleaned_name) > 0)
-        WHERE acbs_cleaned_names_1.customer_code <> acbs_cleaned_names_2.customer_code
-        -- cleaned_name FROM acbs_cleaned_names
-        -- WHERE cleaned_name LIKE '%  %'
+            customer.source,
+            customer.customer_code,
+            customer.customer_party_unique_reference_number,
+            customer.customer_name
+        FROM [ODS].[dbo].[customer] customer
+            JOIN [ODS].[dbo].[facility_party] facility_party
+            ON customer.source = facility_party.source
+                AND customer.ods_key = facility_party.customer_ods_key
+            JOIN [ODS].[dbo].[facility] facility
+            ON facility_party.source = facility.source
+                AND facility_party.facility_ods_key = facility.ods_key
+        WHERE customer.source = 'ACBS'
+            AND facility.facility_status_description = 'ACTIVE ACCOUNT'
+            --  exclude UKEF records
+            AND customer.customer_code <> '00000000'
+            --  exclude deleted records
+            AND customer.change_type <> 'D'
+            AND facility_party.change_type <> 'D'
+            AND facility.change_type <> 'D'
+    ),
+    not_sf_account
+    AS
+    (
+        SELECT *
+        FROM (
+    SELECT DISTINCT
+                customer.source,
+                customer.customer_code,
+                customer.customer_party_unique_reference_number,
+                customer.customer_name
+            FROM [ODS].[dbo].[customer] customer
+                JOIN [ODS].[dbo].[facility_party] facility_party
+                ON customer.source = facility_party.source
+                    AND customer.ods_key = facility_party.customer_ods_key
+                JOIN [ODS].[dbo].[facility] facility
+                ON facility_party.source = facility.source
+                    AND facility_party.facility_ods_key = facility.ods_key
+            WHERE customer.source = 'ACBS'
+                AND facility.facility_status_description = 'ACTIVE ACCOUNT'
+                --  exclude UKEF records
+                AND customer.customer_code <> '00000000'
+                --  exclude deleted records
+                AND customer.change_type <> 'D'
+                AND facility_party.change_type <> 'D'
+                AND facility.change_type <> 'D'
+) AS acbs_customers
+        WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
+            AND NOT EXISTS (
+    SELECT *
+            FROM [ODS].[dbo].[customer] sf_customers
+            WHERE sf_customers.source = 'SalesForce'
+                AND sf_customers.customer_party_unique_reference_number = acbs_customers.customer_party_unique_reference_number
+)
     )
+-- acbs_active_cleaned_names
+-- AS
+-- (
+--     SELECT
+--         source,
+--         customer_name,
+--         customer_party_unique_reference_number,
+--         cleaned_name,
+--         customer_code
+--     FROM (
+--         SELECT DISTINCT
+--             cleaned_names.source,
+--             cleaned_names.customer_code,
+--             cleaned_names.customer_party_unique_reference_number,
+--             cleaned_names.customer_name,
+--             cleaned_names.cleaned_name
+--         FROM cleaned_names
+--             JOIN [ODS].[dbo].[facility_party] facility_party
+--             ON cleaned_names.source = facility_party.source
+--                 AND cleaned_names.ods_key = facility_party.customer_ods_key
+--             JOIN [ODS].[dbo].[facility] facility
+--             ON facility_party.source = facility.source
+--                 AND facility_party.facility_ods_key = facility.ods_key
+--         WHERE cleaned_names.source = 'ACBS'
+--             AND facility.facility_status_description = 'ACTIVE ACCOUNT'
+--             --  exclude UKEF records
+--             AND cleaned_names.customer_code <> '00000000'
+--             --  exclude deleted records
+--             AND cleaned_names.change_type <> 'D'
+--             AND facility_party.change_type <> 'D'
+--             AND facility.change_type <> 'D'
+-- ) AS acbs_customers
+-- ),
+-- disctinct_urns
+-- AS
+-- (
+--     SELECT DISTINCT
+--         -- acbs_cleaned_names_1.customer_name,
+--         -- acbs_cleaned_names_2.customer_name,
+--         -- acbs_cleaned_names_1.cleaned_name,
+--         -- acbs_cleaned_names_2.cleaned_name,
+--         acbs_cleaned_names_1.customer_code
+--     -- acbs_cleaned_names_2.customer_code
+--     FROM acbs_cleaned_names acbs_cleaned_names_1
+--         JOIN acbs_cleaned_names acbs_cleaned_names_2
+--         ON acbs_cleaned_names_1.cleaned_name = acbs_cleaned_names_2.cleaned_name
+--     WHERE acbs_cleaned_names_1.customer_code <> acbs_cleaned_names_2.customer_code
+--     -- cleaned_name FROM acbs_cleaned_names
+--     -- WHERE cleaned_name LIKE '%  %'
+-- ),
+-- distinct_cleaned_names
+-- AS
+-- (
+--     SELECT DISTINCT
+--         acbs_cleaned_names_1.cleaned_name
+--     FROM acbs_cleaned_names acbs_cleaned_names_1
+--         JOIN acbs_cleaned_names acbs_cleaned_names_2
+--         ON acbs_cleaned_names_1.cleaned_name = acbs_cleaned_names_2.cleaned_name
+--     WHERE acbs_cleaned_names_1.customer_party_unique_reference_number <> acbs_cleaned_names_2.customer_party_unique_reference_number
+--     )
+
+-- SELECT
+--     customer_name,
+--     customer_party_unique_reference_number
+-- FROM acbs_cleaned_names
+--     JOIN distinct_cleaned_names
+--     ON distinct_cleaned_names.cleaned_name = acbs_cleaned_names.cleaned_name
+
+-- SELECT
+--     customer.customer_name,
+--     customer.customer_code
+-- FROM customer
+--     JOIN disctinct_urns
+--     ON customer.customer_code = disctinct_urns.customer_code
 SELECT
-    customer.customer_name,
-    customer.customer_code
-FROM customer
-    JOIN disctinct_urns
-    ON customer.customer_code = disctinct_urns.customer_code;
+    acbs_active.customer_name,
+    acbs_active.customer_party_unique_reference_number
+FROM acbs_active
+    LEFT JOIN not_sf_account
+    ON acbs_active.customer_party_unique_reference_number = not_sf_account.customer_party_unique_reference_number
