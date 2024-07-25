@@ -34,10 +34,19 @@ WITH
                 AND customer.change_type <> 'D'
             ) as sf_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
+    ),
+    distinct_cleaned_names
+    AS
+    (
+        SELECT DISTINCT
+            sf_cleaned_names_1.cleaned_name
+        FROM sf_cleaned_names sf_cleaned_names_1
+            JOIN sf_cleaned_names sf_cleaned_names_2
+            ON sf_cleaned_names_1.cleaned_name = sf_cleaned_names_2.cleaned_name
+        WHERE sf_cleaned_names_1.customer_party_unique_reference_number <> sf_cleaned_names_2.customer_party_unique_reference_number
     )
-SELECT
-    COUNT(*) AS 'Salesforce accounts with same name but different URNs'
-FROM sf_cleaned_names sf_customers_1
-    JOIN sf_cleaned_names sf_customers_2
-    ON sf_customers_1.cleaned_name = sf_customers_2.cleaned_name
-WHERE sf_customers_1.customer_party_unique_reference_number <> sf_customers_2.customer_party_unique_reference_number;
+
+SELECT COUNT(*) AS 'Salesforce accounts with same name but different URNs'
+FROM sf_cleaned_names
+    JOIN distinct_cleaned_names
+    ON distinct_cleaned_names.cleaned_name = sf_cleaned_names.cleaned_name;

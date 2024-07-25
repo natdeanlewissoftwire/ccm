@@ -50,4 +50,4 @@ SELECT
     customer_party_unique_reference_number
 FROM sf_cleaned_names
     JOIN distinct_cleaned_names
-    ON distinct_cleaned_names.cleaned_name = sf_cleaned_names.cleaned_name
+    ON distinct_cleaned_names.cleaned_name = sf_cleaned_names.cleaned_name;
