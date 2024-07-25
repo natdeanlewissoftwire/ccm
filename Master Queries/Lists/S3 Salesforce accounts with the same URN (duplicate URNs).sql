@@ -1,7 +1,9 @@
-SELECT number_of_records AS 'Salesforce accounts with the same URN (duplicate URNs)',
+SELECT
+number_of_records AS 'Salesforce accounts with the same URN (duplicate URNs)',
 customer_party_unique_reference_number
 FROM ( 
-    SELECT COUNT(customer_party_unique_reference_number) as 'number_of_records',
+    SELECT
+    COUNT(customer_party_unique_reference_number) as 'number_of_records',
     customer_party_unique_reference_number
     FROM (
         SELECT DISTINCT
@@ -19,4 +21,4 @@ FROM (
     GROUP BY customer_party_unique_reference_number
     HAVING COUNT(customer_party_unique_reference_number) > 1
 ) as groups
-ORDER BY number_of_records DESC
+ORDER BY number_of_records DESC;
