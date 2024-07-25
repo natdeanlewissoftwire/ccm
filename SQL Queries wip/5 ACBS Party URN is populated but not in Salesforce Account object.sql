@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'ACBS entities with URNs that don’t exist in Salesforce'
+SELECT COUNT(*) AS 'ACBS entities with URNs that don’t exist in Salesforce'
 FROM (
     SELECT DISTINCT
         customer.source,
@@ -20,7 +20,7 @@ FROM (
         AND customer.change_type <> 'D'
         AND facility_party.change_type <> 'D'
         AND facility.change_type <> 'D'
-) as acbs_customers
+) AS acbs_customers
 WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
     AND NOT EXISTS (
     SELECT *
@@ -30,4 +30,4 @@ WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
 );
 
 
--- should this be a name comparison as well?
+-- should this be a name comparison AS well?

@@ -1,6 +1,6 @@
 SELECT SUM(number_of_records) AS 'Salesforce accounts with the same URN (duplicate URNs)'
 FROM ( 
-    SELECT COUNT(customer_party_unique_reference_number) as 'number_of_records'
+    SELECT COUNT(customer_party_unique_reference_number) AS 'number_of_records'
     FROM (
         SELECT DISTINCT
             customer.source,
@@ -13,7 +13,7 @@ FROM (
         AND customer.customer_code <> '00000000'
             --  exclude deleted records
         AND customer.change_type <> 'D'
-        ) as sf_customers
+        ) AS sf_customers
     GROUP BY customer_party_unique_reference_number
     HAVING COUNT(customer_party_unique_reference_number) > 1
-) as groups;
+) AS groups;

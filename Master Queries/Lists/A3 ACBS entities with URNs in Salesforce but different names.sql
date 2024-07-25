@@ -33,7 +33,7 @@ WITH
             WHERE cleaned_names.source IN ('SalesForce')
                 AND cleaned_names.customer_code <> '00000000'
                 AND cleaned_names.change_type <> 'D'
-    ) as sf_customers
+    ) AS sf_customers
     ),
     acbs_cleaned_names
     AS
@@ -63,7 +63,7 @@ WITH
                 AND cleaned_names.change_type <> 'D'
                 AND facility_party.change_type <> 'D'
                 AND facility.change_type <> 'D'
-        ) as acbs_customers
+        ) AS acbs_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
     )
 SELECT

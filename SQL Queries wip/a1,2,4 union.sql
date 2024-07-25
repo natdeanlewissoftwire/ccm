@@ -46,7 +46,7 @@ WITH
             WHERE cleaned_names.source IN ('ACBS')
                 AND cleaned_names.customer_code <> '00000000'
                 AND cleaned_names.change_type <> 'D'
-    ) as acbs_customers
+    ) AS acbs_customers
     WHERE customer_code IN ('00000352',
 '00227814',
 '00224708',

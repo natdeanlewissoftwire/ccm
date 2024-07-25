@@ -11,5 +11,5 @@ FROM (
         AND customer.customer_code <> '00000000'
         --  exclude deleted records
         AND customer.change_type <> 'D'
-) as sf_customers
+) AS sf_customers
 WHERE customer_party_unique_reference_number IS NULL;

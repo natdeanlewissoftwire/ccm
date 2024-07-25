@@ -42,7 +42,7 @@ WITH
         AND customer.change_type <> 'D'
                 AND facility_party.change_type <> 'D'
                 AND facility.change_type <> 'D'
-        ) as acbs_customers
+        ) AS acbs_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
     )
 SELECT

@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'ACBS entities with no URN'
+SELECT COUNT(*) AS 'ACBS entities with no URN'
 FROM (
     SELECT DISTINCT
         customer.source,
@@ -20,5 +20,5 @@ FROM (
         AND customer.change_type <> 'D'
         AND facility_party.change_type <> 'D'
         AND facility.change_type <> 'D'
-) as acbs_customers
+) AS acbs_customers
 WHERE customer_party_unique_reference_number IS NULL;

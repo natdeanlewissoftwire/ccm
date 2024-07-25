@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'ACBS records with Party URN present in a SalesforceLegacy record'
+SELECT COUNT(*) AS 'ACBS records with Party URN present in a SalesforceLegacy record'
 FROM (
     SELECT DISTINCT
         customer.source,
@@ -20,7 +20,7 @@ FROM (
         AND customer.change_type <> 'D'
         AND facility_party.change_type <> 'D'
         AND facility.change_type <> 'D'
-) as acbs_customers
+) AS acbs_customers
 WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
     AND EXISTS (
     SELECT *
@@ -29,7 +29,7 @@ WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
         AND sf_customers.customer_party_unique_reference_number = acbs_customers.customer_party_unique_reference_number
 )
 
-SELECT COUNT(*) as 'ACBS records with Party URN present in a SalesforceLegacy record but not a SalesForce record'
+SELECT COUNT(*) AS 'ACBS records with Party URN present in a SalesforceLegacy record but not a SalesForce record'
 FROM (
     SELECT DISTINCT
         customer.source,
@@ -51,7 +51,7 @@ FROM (
         AND customer.change_type <> 'D'
         AND facility_party.change_type <> 'D'
         AND facility.change_type <> 'D'
-) as acbs_customers
+) AS acbs_customers
 WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
     AND EXISTS (
     SELECT *
@@ -67,7 +67,7 @@ WHERE acbs_customers.customer_party_unique_reference_number IS NOT NULL
 );
 
 
--- don't care about this, we're just treating SF and SF legacy as both valid sources
+-- don't care about this, we're just treating SF and SF legacy AS both valid sources
 
 -- do we want there to only be one record rather than there being one in both?
 
