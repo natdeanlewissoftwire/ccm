@@ -9,8 +9,20 @@ WITH
             ods_key,
             change_type,
             customer_party_unique_reference_number,
-            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(customer_name), ' ', ''), '.', ''), ',', ''), '''', ''), '-', ''), '/', ''), '(', ''), ')', ''), 'LIMITED', ''), 'LTD', ''), 'PLC', ''), 'INCORPORATED', ''), 'INC', ''), 'LLC', ''), 'COMPANY', ''), 'CORPORATION', ''), 'CORP', ''), '&', 'AND')
-                AS cleaned_name
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+            -- surround with spaces for CHARINDEX substring checks later on
+            ' ' + 
+            UPPER(customer_name)
+            + ' '
+            -- replace common punctuation with spaces
+            , '.', ' '), ',', ' '), '''', ' '), '-', ' '), '/', ' '), '(', ' '), ')', ' ')
+            -- remove common terms
+            , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', ''), 'THE ', '')
+            -- standardise &
+            , ' & ', ' AND ')
+            -- turn multiple spaces (up to 32 consecutive) into a single space
+            ,'  ',' '),'  ',' '),'  ',' '),'  ',' '),'  ',' ')
+            AS cleaned_name
         FROM [ODS].[dbo].[customer]
         WHERE customer_party_unique_reference_number IS NOT NULL
     ),
@@ -67,12 +79,12 @@ WITH
         WHERE customer_party_unique_reference_number IS NOT NULL
     )
 SELECT
-acbs_customers.source AS acbs_source,
-acbs_customers.customer_name AS acbs_customer_name, 
-acbs_customers.customer_party_unique_reference_number AS acbs_customer_party_unique_reference_number,
-sf_customers.source AS sf_source,
-sf_customers.customer_name AS sf_customer_name,
-sf_customers.customer_party_unique_reference_number AS sf_customer_party_unique_reference_number
+    acbs_customers.source AS acbs_source,
+    acbs_customers.customer_name AS acbs_customer_name,
+    acbs_customers.customer_party_unique_reference_number AS acbs_customer_party_unique_reference_number,
+    sf_customers.source AS sf_source,
+    sf_customers.customer_name AS sf_customer_name,
+    sf_customers.customer_party_unique_reference_number AS sf_customer_party_unique_reference_number
 
 FROM acbs_cleaned_names acbs_customers
     JOIN sf_cleaned_names sf_customers
