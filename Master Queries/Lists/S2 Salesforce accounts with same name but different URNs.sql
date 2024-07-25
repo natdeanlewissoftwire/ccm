@@ -6,7 +6,7 @@ WITH
             source,
             customer_name,
             customer_party_unique_reference_number,
-            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
             -- surround with spaces for CHARINDEX substring checks later on
             ' ' + 
             UPPER(customer_name)
@@ -14,7 +14,7 @@ WITH
             -- replace common punctuation with spaces
             , '.', ' '), ',', ' '), '''', ' '), '-', ' '), '/', ' '), '(', ' '), ')', ' ')
             -- remove common terms
-            , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', '')
+            , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', ''), 'THE ', '')
             -- standardise &
             , ' & ', ' AND ')
             -- turn multiple spaces (up to 32 consecutive) into a single space
@@ -34,14 +34,20 @@ WITH
                 AND customer.change_type <> 'D'
             ) as sf_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
+    ),
+    distinct_cleaned_names
+    AS
+    (
+        SELECT DISTINCT
+            sf_cleaned_names_1.cleaned_name
+        FROM sf_cleaned_names sf_cleaned_names_1
+            JOIN sf_cleaned_names sf_cleaned_names_2
+            ON sf_cleaned_names_1.cleaned_name = sf_cleaned_names_2.cleaned_name
+        WHERE sf_cleaned_names_1.customer_party_unique_reference_number <> sf_cleaned_names_2.customer_party_unique_reference_number
     )
 SELECT
-    sf_customers_1.customer_name AS customer_name_1, 
-    sf_customers_1.customer_party_unique_reference_number AS customer_party_unique_reference_number_1,
-    sf_customers_2.customer_name AS customer_name_2,
-    sf_customers_2.customer_party_unique_reference_number AS customer_party_unique_reference_number_2
-
-FROM sf_cleaned_names sf_customers_1
-    JOIN sf_cleaned_names sf_customers_2
-    ON sf_customers_1.cleaned_name = sf_customers_2.cleaned_name
-WHERE sf_customers_1.customer_party_unique_reference_number < sf_customers_2.customer_party_unique_reference_number;
+    customer_name,
+    customer_party_unique_reference_number
+FROM sf_cleaned_names
+    JOIN distinct_cleaned_names
+    ON distinct_cleaned_names.cleaned_name = sf_cleaned_names.cleaned_name
