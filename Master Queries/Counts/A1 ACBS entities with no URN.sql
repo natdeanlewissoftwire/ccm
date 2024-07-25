@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'ACBS entities with no URN'
+SELECT COUNT(*) AS 'ACBS entities with no URN'
 FROM (
     SELECT DISTINCT
         customer.source,

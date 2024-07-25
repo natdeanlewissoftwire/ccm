@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'ACBS records with Party URN present in a SalesforceLegacy record but not a SalesForce record'
+SELECT COUNT(*) AS 'ACBS records with Party URN present in a SalesforceLegacy record but not a SalesForce record'
 FROM (
     SELECT DISTINCT
         customer.source,

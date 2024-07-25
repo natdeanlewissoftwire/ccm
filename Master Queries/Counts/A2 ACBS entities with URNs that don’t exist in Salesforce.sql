@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'ACBS entities with URNs that don’t exist in Salesforce'
+SELECT COUNT(*) AS 'ACBS entities with URNs that don’t exist in Salesforce'
 FROM (
     SELECT DISTINCT
         customer.source,

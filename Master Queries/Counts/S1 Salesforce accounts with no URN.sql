@@ -1,4 +1,4 @@
-SELECT COUNT(*) as 'Salesforce accounts with no URN'
+SELECT COUNT(*) AS 'Salesforce accounts with no URN'
 FROM (
     SELECT DISTINCT
         customer.source,
