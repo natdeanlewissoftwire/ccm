@@ -86,27 +86,64 @@ WITH
             AND customer.change_type <> 'D'
     )
 SELECT
-    -- STRING_AGG(customer_name, ', ') AS 'Customer Name',
-    -- STRING_AGG(customer_code, ', ') AS 'Customer ID',
-    -- STRING_AGG(customer_party_unique_reference_number, ', ') as 'URN'
-    acbs_cleaned_names_linked_to_active_facilities.customer_name,
-    acbs_cleaned_names_linked_to_active_facilities.customer_code,
-    acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number,
-    acbs_cleaned_names.customer_name,
-    acbs_cleaned_names.customer_code,
-    acbs_cleaned_names.customer_party_unique_reference_number,
-    sf_customers.customer_name,
-    sf_customers.customer_code,
-    sf_customers.customer_party_unique_reference_number,
+    acbs_cleaned_names_linked_to_active_facilities.customer_name AS 'Active ACBS Customer Name',
+    acbs_cleaned_names_linked_to_active_facilities.customer_code  AS 'Active ACBS Customer Code',
+    acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number  AS 'Active ACBS Customer URN (A1)',
     CASE
-        WHEN sf_customers.source = 'SalesforceLegacy' THEN 'TRUE'
-        WHEN sf_customers.source = 'SalesForce' THEN 'FALSE'
+    WHEN acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number IS NOT NULL
+        AND EXISTS (
+    SELECT *
+        FROM [ODS].[dbo].[customer] salesforce
+        WHERE salesforce.source = 'SalesForce'
+            AND salesforce.customer_party_unique_reference_number = acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number
+    ) THEN 'Yes'
+    ELSE 'No'
     END
-    AS 'Legacy indicator'
+    AS 'URN present in SalesForce (A2)',
+    CASE
+        WHEN acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number IS NOT NULL
+        AND EXISTS (
+    SELECT *
+        FROM [ODS].[dbo].[customer] salesforce_legacy
+        WHERE salesforce_legacy.source = 'SalesforceLegacy'
+            AND salesforce_legacy.customer_party_unique_reference_number = acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number
+)
+        AND NOT EXISTS (
+    SELECT *
+        FROM [ODS].[dbo].[customer] salesforce
+        WHERE salesforce.source = 'SalesForce'
+            AND salesforce.customer_party_unique_reference_number = acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number
+) THEN 'Yes'
+ELSE 'No'
+    END
+    AS 'ACBS URN is only present in Salesforce Legacy Data (A4)',
+    acbs_cleaned_names.customer_name AS 'Fuzzy-Matching ACBS Customer Name',
+    acbs_cleaned_names.customer_code AS 'Fuzzy-Matching ACBS Customer Code',
+    acbs_cleaned_names.customer_party_unique_reference_number  AS 'Fuzzy-Matching ACBS Customer URN',
+    sf_customers.customer_party_unique_reference_number AS 'URN-Matching Salesforce Customer URN',
+    sf_customers.customer_name AS 'URN-Matching Salesforce Customer Name',
+    sf_customers.customer_code AS 'URN-Matching Salesforce Customer Code',
+    CASE
+        WHEN sf_customers.customer_party_unique_reference_number IS NOT NULL
+        AND EXISTS (
+    SELECT *
+        FROM [ODS].[dbo].[customer] salesforce_legacy
+        WHERE salesforce_legacy.source = 'SalesforceLegacy'
+            AND salesforce_legacy.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
+)
+        AND NOT EXISTS (
+    SELECT *
+        FROM [ODS].[dbo].[customer] salesforce
+        WHERE salesforce.source = 'SalesForce'
+            AND salesforce.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
+) THEN 'Yes'
+ELSE 'No'
+    END
+    AS 'URN-Matching Salesforce URN is only present in Salesforce Legacy Data'
 FROM acbs_cleaned_names_linked_to_active_facilities
     JOIN acbs_cleaned_names
     ON acbs_cleaned_names_linked_to_active_facilities.cleaned_name = acbs_cleaned_names.cleaned_name
     LEFT JOIN sf_customers
     ON acbs_cleaned_names.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
 WHERE acbs_cleaned_names_linked_to_active_facilities.customer_code <> acbs_cleaned_names.customer_code
-    -- AND acbs_cleaned_names_linked_to_active_facilities.customer_code = '00236724'
+    ORDER BY acbs_cleaned_names_linked_to_active_facilities.customer_code
