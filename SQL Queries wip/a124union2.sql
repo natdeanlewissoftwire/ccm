@@ -146,4 +146,5 @@ FROM acbs_cleaned_names_linked_to_active_facilities
     LEFT JOIN sf_customers
     ON acbs_cleaned_names.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
 WHERE acbs_cleaned_names_linked_to_active_facilities.customer_code <> acbs_cleaned_names.customer_code
+    -- AND acbs_cleaned_names_linked_to_active_facilities.customer_code = '00236724'
     ORDER BY acbs_cleaned_names_linked_to_active_facilities.customer_code
