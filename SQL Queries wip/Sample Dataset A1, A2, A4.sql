@@ -132,7 +132,7 @@ ELSE 'No'
             AND salesforce_legacy.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
 )
         AND NOT EXISTS (
-    SELECT *
+SELECT *
         FROM [ODS].[dbo].[customer] salesforce
         WHERE salesforce.source = 'SalesForce'
             AND salesforce.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
@@ -141,10 +141,9 @@ ELSE 'No'
     END
     AS 'URN-Matching Salesforce URN is only present in Salesforce Legacy Data'
 FROM acbs_cleaned_names_linked_to_active_facilities
-    JOIN acbs_cleaned_names
+    LEFT JOIN acbs_cleaned_names
     ON acbs_cleaned_names_linked_to_active_facilities.cleaned_name = acbs_cleaned_names.cleaned_name
     LEFT JOIN sf_customers
     ON acbs_cleaned_names.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
-WHERE acbs_cleaned_names_linked_to_active_facilities.customer_code <> acbs_cleaned_names.customer_code
-    -- AND acbs_cleaned_names_linked_to_active_facilities.customer_code = '00236724'
+--     -- AND acbs_cleaned_names_linked_to_active_facilities.customer_code = '00236724'
     ORDER BY acbs_cleaned_names_linked_to_active_facilities.customer_code

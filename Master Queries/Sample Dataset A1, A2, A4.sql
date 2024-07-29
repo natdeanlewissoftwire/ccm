@@ -85,6 +85,7 @@ WITH
             --  exclude deleted records
             AND customer.change_type <> 'D'
     )
+
 SELECT
     acbs_cleaned_names_linked_to_active_facilities.customer_name AS 'Active ACBS Customer Name',
     acbs_cleaned_names_linked_to_active_facilities.customer_code  AS 'Active ACBS Customer Code',
@@ -140,10 +141,10 @@ ELSE 'No'
 ELSE 'No'
     END
     AS 'URN-Matching Salesforce URN is only present in Salesforce Legacy Data'
+
 FROM acbs_cleaned_names_linked_to_active_facilities
-    JOIN acbs_cleaned_names
+    LEFT JOIN acbs_cleaned_names
     ON acbs_cleaned_names_linked_to_active_facilities.cleaned_name = acbs_cleaned_names.cleaned_name
     LEFT JOIN sf_customers
     ON acbs_cleaned_names.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
-WHERE acbs_cleaned_names_linked_to_active_facilities.customer_code <> acbs_cleaned_names.customer_code
-    ORDER BY acbs_cleaned_names_linked_to_active_facilities.customer_code
+ORDER BY acbs_cleaned_names_linked_to_active_facilities.customer_code
