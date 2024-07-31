@@ -1,15 +1,69 @@
-SELECT TOP 100 *
-FROM [ODS].[dbo].[customer] acbs_customers
-WHERE customer_name IS NOT NULL
-AND customer_type_code IS NOT NULL
-AND customer_type_description IS NOT NULL
-AND customer_watch_monitor_flag IS NOT NULL
-AND customer_watch_monitor_reason IS NOT NULL
-AND customer_watch_monitor_datetime IS NOT NULL
-AND customer_party_unique_reference_number IS NOT NULL
-AND EXISTS (
-    SELECT *
-    FROM customer sf_customers
+SELECT TOP 100
+    customer_name AS 'Name 1',
+    customer_party_unique_reference_number AS 'URN',
+    customer_type_code AS 'Customer Type',
+    customer_watch_monitor_flag AS 'Customer Watch Status',
+    customer_x_classification__relationship.classification_ods_key AS 'UK Entity?',
+    customer_size_code AS 'SME',
+    customer_risk_rating.customer_credit_risk_rating_code AS 'Officer Risk Rating',
+    customer_x_classification__relationship.customer_classification_relationship_type AS ' Primary Industry Classification',
+    customer_address.customer_address_country_ods_key AS 'Country',
+    customer_risk_rating.customer_risk_rating_entity_code AS 'Rating Entity',
+    customer_risk_rating.customer_risk_rating_type_code AS 'Assigned Rating/ECGD Status',
+    'TBC' AS "Loss Given Default"
+FROM [ODS].[dbo].[customer] customer
+    JOIN [ODS].[dbo].[facility_party] facility_party
+    ON customer.source = facility_party.source
+        AND customer.ods_key = facility_party.customer_ods_key
+    JOIN [ODS].[dbo].[facility] facility
+    ON facility_party.source = facility.source
+        AND facility_party.facility_ods_key = facility.ods_key
+    JOIN [ODS].[dbo].[customer_x_classification__relationship] customer_x_classification__relationship
+    ON customer_x_classification__relationship.customer_ods_key = customer.ods_key
+    JOIN [ODS].[dbo].[customer_risk_rating]
+    ON customer_risk_rating.customer_ods_key = customer.ods_key
+    JOIN [ODS].[dbo].[customer_address]
+    ON customer_address.customer_ods_key = customer.ods_key
+WHERE customer.source = 'ACBS'
+    AND facility.facility_status_description = 'ACTIVE ACCOUNT'
+    --  exclude UKEF records
+    AND customer.customer_code <> '00000000'
+    --  exclude deleted records
+    AND customer.change_type <> 'D'
+    AND facility_party.change_type <> 'D'
+    AND facility.change_type <> 'D'
+    AND customer.customer_party_unique_reference_number IS NOT NULL
+    AND EXISTS (
+    SELECT 1
+    FROM [ODS].[dbo].[customer] sf_customer
     WHERE source = 'SalesForce'
-    AND sf_customers.customer_party_unique_reference_number = acbs_customers.customer_party_unique_reference_number
+        AND sf_customer.customer_party_unique_reference_number = customer.customer_party_unique_reference_number
+    GROUP BY sf_customer.customer_party_unique_reference_number
+    HAVING COUNT(*) = 1
 )
+    AND customer_name IS NOT NULL
+    AND customer_party_unique_reference_number IS NOT NULL
+    AND customer_type_code IS NOT NULL
+    AND customer_watch_monitor_flag IS NOT NULL
+    AND customer_x_classification__relationship.classification_ods_key IS NOT NULL
+    AND customer_size_code IS NOT NULL
+    AND customer_risk_rating.customer_credit_risk_rating_code IS NOT NULL
+    AND customer_x_classification__relationship.customer_classification_relationship_type IS NOT NULL
+    AND customer_address.customer_address_country_ods_key IS NOT NULL
+    AND customer_risk_rating.customer_risk_rating_entity_code IS NOT NULL
+    AND customer_risk_rating.customer_risk_rating_type_code IS NOT NULL
+-- GROUP BY
+--     customer_name,
+--     customer_party_unique_reference_number,
+--     customer_type_code,
+--     customer_watch_monitor_flag,
+--     customer_x_classification__relationship.classification_ods_key,
+--     customer_size_code,
+--     customer_risk_rating.customer_credit_risk_rating_code,
+--     customer_x_classification__relationship.customer_classification_relationship_type,
+--     customer_address.customer_address_country_ods_key,
+--     customer_risk_rating.customer_risk_rating_entity_code,
+--     customer_risk_rating.customer_risk_rating_type_code
+-- HAVING COUNT(*) = 1
+-- group
+--  no duplicate of other acbs
