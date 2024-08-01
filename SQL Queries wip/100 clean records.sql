@@ -34,7 +34,7 @@ SELECT TOP 100
     customer_x_classification__relationship.classification_ods_key AS 'UK Entity?',
     customer_size_code AS 'SME',
     customer_risk_rating.customer_credit_risk_rating_code AS 'Officer Risk Rating',
-    customer_x_classification__relationship.customer_classification_relationship_type AS ' Primary Industry Classification',
+    customer_x_classification__relationship.customer_classification_relationship_type AS 'Primary Industry Classification',
     customer_address.customer_address_country_ods_key AS 'Country',
     customer_risk_rating.customer_risk_rating_entity_code AS 'Rating Entity',
     customer_risk_rating.customer_risk_rating_type_code AS 'Assigned Rating/ECGD Status',
