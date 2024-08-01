@@ -1,5 +1,5 @@
 WITH
-    DistinctFacilityAndPartyTypes
+    distinct_facility_and_party_types
     AS
     (
         SELECT
@@ -39,7 +39,7 @@ SELECT
     customer_name,
     STRING_AGG(CAST(facility_type_description AS NVARCHAR(MAX)), CHAR(10)) AS 'Customer facility types',
     STRING_AGG(CAST(facility_party_role_type_description AS NVARCHAR(MAX)), CHAR(10)) AS 'Customer facility party role types'
-FROM DistinctFacilityAndPartyTypes
+FROM distinct_facility_and_party_types
 GROUP BY 
     source, 
     customer_code, 
