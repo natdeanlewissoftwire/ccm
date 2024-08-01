@@ -1,6 +1,34 @@
+WITH
+    cleaned_names
+    AS
+    (
+        SELECT
+            source,
+            customer_name,
+            customer_code,
+            ods_key,
+            change_type,
+            customer_party_unique_reference_number,
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+            -- surround with spaces for CHARINDEX substring checks later on
+            ' ' + 
+            UPPER(customer_name)
+            + ' '
+            -- replace common punctuation with spaces
+            , '.', ' '), ',', ' '), '''', ' '), '-', ' '), '/', ' '), '(', ' '), ')', ' ')
+            -- remove common terms
+            , ' LIMITED', ''), ' LTD', ''), ' PLC', ''), ' INCORPORATED', ''), ' INC', ''), ' LLC', ''), ' COMPANY', ''), ' CORPORATION', ''), ' CORP', ''), 'THE ', '')
+            -- standardise &
+            , ' & ', ' AND ')
+            -- turn multiple spaces (up to 32 consecutive) into a single space
+            ,'  ',' '),'  ',' '),'  ',' '),'  ',' '),'  ',' ')
+            AS cleaned_name
+        FROM [ODS].[dbo].[customer]
+        WHERE customer_party_unique_reference_number IS NOT NULL
+    )
 SELECT TOP 100
-    customer_name AS 'Name 1',
-    customer_party_unique_reference_number AS 'URN',
+    customer.customer_name AS 'Name 1',
+    customer.customer_party_unique_reference_number AS 'URN',
     customer_type_code AS 'Customer Type',
     customer_watch_monitor_flag AS 'Customer Watch Status',
     customer_x_classification__relationship.classification_ods_key AS 'UK Entity?',
@@ -24,6 +52,9 @@ FROM [ODS].[dbo].[customer] customer
     ON customer_risk_rating.customer_ods_key = customer.ods_key
     JOIN [ODS].[dbo].[customer_address]
     ON customer_address.customer_ods_key = customer.ods_key
+    JOIN cleaned_names
+    ON customer.source = cleaned_names.source
+        AND customer.ods_key = cleaned_names.ods_key
 WHERE customer.source = 'ACBS'
     AND facility.facility_status_description = 'ACTIVE ACCOUNT'
     --  exclude UKEF records
@@ -32,7 +63,6 @@ WHERE customer.source = 'ACBS'
     AND customer.change_type <> 'D'
     AND facility_party.change_type <> 'D'
     AND facility.change_type <> 'D'
-    AND customer.customer_party_unique_reference_number IS NOT NULL
     AND EXISTS (
     SELECT 1
     FROM [ODS].[dbo].[customer] sf_customer
@@ -41,29 +71,29 @@ WHERE customer.source = 'ACBS'
     GROUP BY sf_customer.customer_party_unique_reference_number
     HAVING COUNT(*) = 1
 )
-    AND customer_name IS NOT NULL
-    AND customer_party_unique_reference_number IS NOT NULL
+    AND customer.customer_party_unique_reference_number IS NOT NULL
+    AND customer.customer_name IS NOT NULL
+    AND customer.customer_party_unique_reference_number IS NOT NULL
     AND customer_type_code IS NOT NULL
     AND customer_watch_monitor_flag IS NOT NULL
-    AND customer_x_classification__relationship.classification_ods_key IS NOT NULL
+    AND customer_x_classification__relationship.classification_ods_key LIKE 'CITIZENCLASS#%'
     AND customer_size_code IS NOT NULL
     AND customer_risk_rating.customer_credit_risk_rating_code IS NOT NULL
     AND customer_x_classification__relationship.customer_classification_relationship_type IS NOT NULL
     AND customer_address.customer_address_country_ods_key IS NOT NULL
     AND customer_risk_rating.customer_risk_rating_entity_code IS NOT NULL
     AND customer_risk_rating.customer_risk_rating_type_code IS NOT NULL
--- GROUP BY
---     customer_name,
---     customer_party_unique_reference_number,
---     customer_type_code,
---     customer_watch_monitor_flag,
---     customer_x_classification__relationship.classification_ods_key,
---     customer_size_code,
---     customer_risk_rating.customer_credit_risk_rating_code,
---     customer_x_classification__relationship.customer_classification_relationship_type,
---     customer_address.customer_address_country_ods_key,
---     customer_risk_rating.customer_risk_rating_entity_code,
---     customer_risk_rating.customer_risk_rating_type_code
--- HAVING COUNT(*) = 1
--- group
---  no duplicate of other acbs
+GROUP BY
+    customer.customer_name,
+    customer.customer_party_unique_reference_number,
+    customer_type_code,
+    customer_watch_monitor_flag,
+    customer_x_classification__relationship.classification_ods_key,
+    customer_size_code,
+    customer_risk_rating.customer_credit_risk_rating_code,
+    customer_x_classification__relationship.customer_classification_relationship_type,
+    customer_address.customer_address_country_ods_key,
+    customer_risk_rating.customer_risk_rating_entity_code,
+    customer_risk_rating.customer_risk_rating_type_code,
+    cleaned_names.cleaned_name
+HAVING COUNT(cleaned_names.cleaned_name) = 1
