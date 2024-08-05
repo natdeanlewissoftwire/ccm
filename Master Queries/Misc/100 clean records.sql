@@ -38,7 +38,7 @@ SELECT TOP 100
     customer_address.customer_address_country_ods_key AS 'Country',
     customer_risk_rating.customer_risk_rating_entity_code AS 'Rating Entity',
     customer_risk_rating.customer_risk_rating_type_code AS 'Assigned Rating/ECGD Status',
-    'TBC' AS "Loss Given Default"
+    customer_risk_parameter_value AS "Loss Given Default"
 FROM [ODS].[dbo].[customer] customer
     JOIN [ODS].[dbo].[facility_party] facility_party
     ON customer.source = facility_party.source
@@ -55,6 +55,11 @@ FROM [ODS].[dbo].[customer] customer
     JOIN cleaned_names
     ON customer.source = cleaned_names.source
         AND customer.ods_key = cleaned_names.ods_key
+    JOIN customer_risk_parameter
+    ON customer.ods_key = customer_risk_parameter.customer_ods_key
+        AND customer_risk_parameter.source = 'ACBS'
+        AND customer_risk_parameter_code = 'LGD'
+        AND customer_risk_source_type_code = 'I'
 WHERE customer.source = 'ACBS'
     AND facility.facility_status_description = 'ACTIVE ACCOUNT'
     --  exclude UKEF records
@@ -95,5 +100,6 @@ GROUP BY
     customer_address.customer_address_country_ods_key,
     customer_risk_rating.customer_risk_rating_entity_code,
     customer_risk_rating.customer_risk_rating_type_code,
-    cleaned_names.cleaned_name
+    cleaned_names.cleaned_name,
+    customer_risk_parameter_value
 HAVING COUNT(cleaned_names.cleaned_name) = 1
