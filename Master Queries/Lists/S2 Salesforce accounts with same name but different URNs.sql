@@ -29,9 +29,9 @@ WITH
             FROM [ODS].[dbo].[customer] customer
             WHERE customer.source IN ('SalesForce')
                 --  exclude UKEF records
-                AND customer.customer_code <> '00000000'
+                AND customer.customer_code != '00000000'
                 --  exclude deleted records
-                AND customer.change_type <> 'D'
+                AND customer.change_type != 'D'
             ) AS sf_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
     ),
@@ -43,7 +43,7 @@ WITH
         FROM sf_cleaned_names sf_cleaned_names_1
             JOIN sf_cleaned_names sf_cleaned_names_2
             ON sf_cleaned_names_1.cleaned_name = sf_cleaned_names_2.cleaned_name
-        WHERE sf_cleaned_names_1.customer_party_unique_reference_number <> sf_cleaned_names_2.customer_party_unique_reference_number
+        WHERE sf_cleaned_names_1.customer_party_unique_reference_number != sf_cleaned_names_2.customer_party_unique_reference_number
     )
 SELECT
     customer_name,

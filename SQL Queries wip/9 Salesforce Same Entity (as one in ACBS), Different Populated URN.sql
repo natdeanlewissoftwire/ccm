@@ -37,11 +37,11 @@ WITH
             WHERE customer.source = 'ACBS'
                 AND facility.facility_status_description = 'ACTIVE ACCOUNT'
                 --  exclude UKEF records
-        AND customer.customer_code <> '00000000'
+        AND customer.customer_code != '00000000'
                 --  exclude deleted records
-        AND customer.change_type <> 'D'
-                AND facility_party.change_type <> 'D'
-                AND facility.change_type <> 'D'
+        AND customer.change_type != 'D'
+                AND facility_party.change_type != 'D'
+                AND facility.change_type != 'D'
         ) AS acbs_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
     )
@@ -67,7 +67,7 @@ FROM acbs_cleaned_names acbs_customers
     -- )
 WHERE acbs_customers.source = 'ACBS'
     AND sf_customers.source IN ('SalesForce')
-    AND acbs_customers.customer_party_unique_reference_number <> sf_customers.customer_party_unique_reference_number;
+    AND acbs_customers.customer_party_unique_reference_number != sf_customers.customer_party_unique_reference_number;
 
 
 
@@ -84,7 +84,7 @@ WHERE acbs_customers.source = 'ACBS'
 --     AND acbs_customers.customer_party_unique_reference_number IS NOT NULL
 --     AND sf_customers.source IN ('SalesForce')
 --     AND sf_customers.customer_party_unique_reference_number IS NOT NULL
---     AND acbs_customers.customer_party_unique_reference_number <> sf_customers.customer_party_unique_reference_number
+--     AND acbs_customers.customer_party_unique_reference_number != sf_customers.customer_party_unique_reference_number
 
 -- decide same entity based on more than just name?
 

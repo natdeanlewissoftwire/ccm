@@ -63,11 +63,11 @@ FROM [ODS].[dbo].[customer] customer
 WHERE customer.source = 'ACBS'
     AND facility.facility_status_description = 'ACTIVE ACCOUNT'
     --  exclude UKEF records
-    AND customer.customer_code <> '00000000'
+    AND customer.customer_code != '00000000'
     --  exclude deleted records
-    AND customer.change_type <> 'D'
-    AND facility_party.change_type <> 'D'
-    AND facility.change_type <> 'D'
+    AND customer.change_type != 'D'
+    AND facility_party.change_type != 'D'
+    AND facility.change_type != 'D'
     AND EXISTS (
     SELECT 1
     FROM [ODS].[dbo].[customer] sf_customer

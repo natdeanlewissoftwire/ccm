@@ -37,11 +37,11 @@ WITH
             WHERE customer.source = 'ACBS'
                 AND facility.facility_status_description = 'ACTIVE ACCOUNT'
                 --  exclude UKEF records
-        AND customer.customer_code <> '00000000'
+        AND customer.customer_code != '00000000'
                 --  exclude deleted records
-        AND customer.change_type <> 'D'
-                AND facility_party.change_type <> 'D'
-                AND facility.change_type <> 'D'
+        AND customer.change_type != 'D'
+                AND facility_party.change_type != 'D'
+                AND facility.change_type != 'D'
         ) AS acbs_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
     )
@@ -59,7 +59,7 @@ FROM acbs_cleaned_names acbs_customers
 WHERE acbs_customers.source = 'ACBS'
     AND sf_customers.source IN ('SalesForce')
     -- cleaned names different:
-    AND acbs_customers.cleaned_name <> sf_customers.cleaned_name
+    AND acbs_customers.cleaned_name != sf_customers.cleaned_name
 
     -- cleaned names not substrings of each other:
     AND CHARINDEX(acbs_customers.cleaned_name, sf_customers.cleaned_name) + CHARINDEX(sf_customers.cleaned_name, acbs_customers.cleaned_name) = 0;
@@ -80,7 +80,7 @@ WHERE acbs_customers.source = 'ACBS'
 -- AND 
 -- REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(acbs_customers.customer_name)
 -- , ' ', ''), '.', ''), ',', ''), '-', ''), '/', ''), '(', ''), ')', ''), 'LIMITED', ''), 'LTD', ''), 'PLC', ''), 'INCORPORATED', ''), 'INC', ''), 'LLC', ''), 'COMPANY', ''), 'CORPORATION', ''), 'CORP', ''), 'CO', ''), 'GMBH', ''), 'UK', ''), '&', 'AND'), 'AND', ''), 'THE', '')
--- <> 
+-- != 
 -- REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(sf_customers.customer_name)
 -- , ' ', ''), '.', ''), ',', ''), '-', ''), '/', ''), '(', ''), ')', ''), 'LIMITED', ''), 'LTD', ''), 'PLC', ''), 'INCORPORATED', ''), 'INC', ''), 'LLC', ''), 'COMPANY', ''), 'CORPORATION', ''), 'CORP', ''), 'CO', ''), 'GMBH', ''), 'UK', ''), '&', 'AND'), 'AND', ''), 'THE', '')
 

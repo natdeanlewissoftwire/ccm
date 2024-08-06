@@ -43,8 +43,8 @@ WITH
                 cleaned_names.cleaned_name
             FROM cleaned_names
             WHERE cleaned_names.source IN ('SalesForce')
-                AND cleaned_names.customer_code <> '00000000'
-                AND cleaned_names.change_type <> 'D'
+                AND cleaned_names.customer_code != '00000000'
+                AND cleaned_names.change_type != 'D'
     ) AS sf_customers
     ),
     acbs_cleaned_names
@@ -71,10 +71,10 @@ WITH
                     AND facility_party.facility_ods_key = facility.ods_key
             WHERE cleaned_names.source = 'ACBS'
                 AND facility.facility_status_description = 'ACTIVE ACCOUNT'
-                AND cleaned_names.customer_code <> '00000000'
-                AND cleaned_names.change_type <> 'D'
-                AND facility_party.change_type <> 'D'
-                AND facility.change_type <> 'D'
+                AND cleaned_names.customer_code != '00000000'
+                AND cleaned_names.change_type != 'D'
+                AND facility_party.change_type != 'D'
+                AND facility.change_type != 'D'
         ) AS acbs_customers
         WHERE customer_party_unique_reference_number IS NOT NULL
     )
@@ -83,4 +83,4 @@ SELECT
 FROM acbs_cleaned_names acbs_customers
     JOIN sf_cleaned_names sf_customers
     ON acbs_customers.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
-WHERE acbs_customers.cleaned_name <> sf_customers.cleaned_name;
+WHERE acbs_customers.cleaned_name != sf_customers.cleaned_name;

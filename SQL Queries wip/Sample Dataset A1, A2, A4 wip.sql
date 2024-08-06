@@ -45,8 +45,8 @@ WITH
                 ods_key
             FROM cleaned_names
             WHERE cleaned_names.source = 'ACBS'
-                AND cleaned_names.customer_code <> '00000000'
-                AND cleaned_names.change_type <> 'D'
+                AND cleaned_names.customer_code != '00000000'
+                AND cleaned_names.change_type != 'D'
         ) AS acbs_customers
     ),
     acbs_cleaned_names_linked_to_active_facilities
@@ -67,8 +67,8 @@ WITH
             ON facility_party.source = facility.source
                 AND facility_party.facility_ods_key = facility.ods_key
         WHERE facility.facility_status_description = 'ACTIVE ACCOUNT'
-            AND facility_party.change_type <> 'D'
-            AND facility.change_type <> 'D'
+            AND facility_party.change_type != 'D'
+            AND facility.change_type != 'D'
     ),
     sf_customers
     AS
@@ -81,9 +81,9 @@ WITH
         FROM [ODS].[dbo].[customer] customer
         WHERE customer.source IN ('SalesForce', 'SalesforceLegacy')
             --  exclude UKEF records
-            AND customer.customer_code <> '00000000'
+            AND customer.customer_code != '00000000'
             --  exclude deleted records
-            AND customer.change_type <> 'D'
+            AND customer.change_type != 'D'
     )
 SELECT
     acbs_cleaned_names_linked_to_active_facilities.customer_name AS 'Active ACBS Customer Name',
