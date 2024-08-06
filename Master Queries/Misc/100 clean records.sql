@@ -29,10 +29,11 @@ WITH
 SELECT TOP 100
     customer.customer_name AS 'Name 1',
     customer.customer_party_unique_reference_number AS 'URN',
-    customer_type_code AS 'Customer Type',
-    customer_watch_monitor_flag AS 'Customer Watch Status',
+    sf_customer.customer_code AS 'Salesforce ID',
+    customer.customer_type_code AS 'Customer Type',
+    customer.customer_watch_monitor_flag AS 'Customer Watch Status',
     customer_x_classification__relationship.classification_ods_key AS 'UK Entity?',
-    customer_size_code AS 'SME',
+    customer.customer_size_code AS 'SME',
     customer_risk_rating.customer_credit_risk_rating_code AS 'Officer Risk Rating',
     customer_x_classification__relationship.customer_classification_relationship_type AS 'Primary Industry Classification',
     customer_address.customer_address_country_ods_key AS 'Country',
@@ -60,7 +61,11 @@ FROM [ODS].[dbo].[customer] customer
         AND customer_risk_parameter.source = 'ACBS'
         AND customer_risk_parameter_code = 'LGD'
         AND customer_risk_source_type_code = 'I'
+    JOIN [ODS].[dbo].[customer] sf_customer
+        ON sf_customer.source = 'SalesForce'
+        AND sf_customer.customer_party_unique_reference_number = customer.customer_party_unique_reference_number
 WHERE customer.source = 'ACBS'
+    AND sf_customer.source = 'SalesForce'
     AND facility.facility_status_description = 'ACTIVE ACCOUNT'
     --  exclude UKEF records
     AND customer.customer_code != '00000000'
@@ -78,11 +83,12 @@ WHERE customer.source = 'ACBS'
 )
     AND customer.customer_party_unique_reference_number IS NOT NULL
     AND customer.customer_name IS NOT NULL
+    AND sf_customer.customer_code IS NOT NULL
     AND customer.customer_party_unique_reference_number IS NOT NULL
-    AND customer_type_code IS NOT NULL
-    AND customer_watch_monitor_flag IS NOT NULL
+    AND customer.customer_type_code IS NOT NULL
+    AND customer.customer_watch_monitor_flag IS NOT NULL
     AND customer_x_classification__relationship.classification_ods_key LIKE 'CITIZENCLASS#%'
-    AND customer_size_code IS NOT NULL
+    AND customer.customer_size_code IS NOT NULL
     AND customer_risk_rating.customer_credit_risk_rating_code IS NOT NULL
     AND customer_x_classification__relationship.customer_classification_relationship_type IS NOT NULL
     AND customer_address.customer_address_country_ods_key IS NOT NULL
@@ -90,11 +96,12 @@ WHERE customer.source = 'ACBS'
     AND customer_risk_rating.customer_risk_rating_type_code IS NOT NULL
 GROUP BY
     customer.customer_name,
+    sf_customer.customer_code,
     customer.customer_party_unique_reference_number,
-    customer_type_code,
-    customer_watch_monitor_flag,
+    customer.customer_type_code,
+    customer.customer_watch_monitor_flag,
     customer_x_classification__relationship.classification_ods_key,
-    customer_size_code,
+    customer.customer_size_code,
     customer_risk_rating.customer_credit_risk_rating_code,
     customer_x_classification__relationship.customer_classification_relationship_type,
     customer_address.customer_address_country_ods_key,
