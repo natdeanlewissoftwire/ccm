@@ -40,7 +40,7 @@ SELECT TOP 100
         END
     AS 'Customer Watch Status',
     customer_risk_rating.customer_credit_risk_rating_description AS 'Credit Risk Rating',
-    customer_x_classification__relationship.ods_key AS 'Primary Industry Classification',
+    customer_classification.classification_description AS 'Primary Industry Classification',
     customer_risk_rating.customer_risk_rating_type_description AS 'Assigned Rating/ECGD Status',
     customer_risk_parameter_value AS "Loss Given Default"
 FROM [ODS].[dbo].[customer] customer
@@ -51,7 +51,9 @@ FROM [ODS].[dbo].[customer] customer
     ON facility_party.source = facility.source
         AND facility_party.facility_ods_key = facility.ods_key
     JOIN [ODS].[dbo].[customer_x_classification__relationship] customer_x_classification__relationship
-    ON customer_x_classification__relationship.customer_ods_key = customer.ods_key
+        ON customer_x_classification__relationship.customer_ods_key = customer.ods_key
+    JOIN [ODS].[dbo].[customer_classification] customer_classification
+        ON customer_x_classification__relationship.classification_ods_key = customer_classification.ods_key
     JOIN [ODS].[dbo].[customer_risk_rating]
     ON customer_risk_rating.customer_ods_key = customer.ods_key
     JOIN [ODS].[dbo].[customer_address]
@@ -100,7 +102,7 @@ GROUP BY
     customer.customer_party_unique_reference_number,
     customer.customer_type_description,
     customer.customer_watch_monitor_flag,
-    customer_x_classification__relationship.ods_key,
+    customer_classification.classification_description,
     customer_risk_rating.customer_credit_risk_rating_description,
     customer_x_classification__relationship.customer_classification_relationship_type,
     customer_risk_rating.customer_risk_rating_type_description,
