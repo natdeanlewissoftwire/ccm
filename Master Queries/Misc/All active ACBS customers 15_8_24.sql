@@ -76,6 +76,8 @@ WITH
         SELECT
             all_facility_and_party_types.ods_key,
             STRING_AGG(CAST(facility_type_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_types,
+            COUNT(facility_type_description) AS facility_count,
+            SUM(CASE WHEN facility_type_description LIKE '%PARIS CLUB%' THEN 1 ELSE 0 END) AS paris_club_facility_count,
             STRING_AGG(CAST(facility_party_role_type_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_party_role_types
         FROM (
             SELECT
@@ -117,9 +119,12 @@ FROM acbs_cleaned_names_linked_to_active_facilities
     ON acbs_cleaned_names_linked_to_active_facilities.ods_key = distinct_facility_and_party_types.ods_key
 
 -- Paris club:
-WHERE (customer_facility_types LIKE '%PARIS CLUB%'
-OR customer_facility_party_role_types LIKE '%PARIS CLUB%')
+-- WHERE (customer_facility_types LIKE '%PARIS CLUB%'
+-- OR customer_facility_party_role_types LIKE '%PARIS CLUB%')
+
+-- ONLY Paris club:
+-- WHERE facility_count = paris_club_facility_count
 
 -- Aero:
-AND (customer_facility_types LIKE '%BUYER CREDIT GUARANTEE%'
-OR customer_facility_party_role_types LIKE '%BUYER CREDIT GUARANTEE%')
+-- AND (customer_facility_types LIKE '%BUYER CREDIT GUARANTEE%'
+-- OR customer_facility_party_role_types LIKE '%BUYER CREDIT GUARANTEE%')
