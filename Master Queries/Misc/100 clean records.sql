@@ -40,11 +40,8 @@ SELECT TOP 100
         END
     AS 'Customer Watch Status',
     customer_risk_rating.customer_credit_risk_rating_description AS 'Credit Risk Rating',
-<<<<<<< HEAD
     customer_risk_rating.customer_risk_rating_type_datetime AS 'Credit Risk Rating Date',
     customer_risk_rating.customer_credit_risk_rating_datetime AS 'Assigned Risk Rating Date',
-=======
->>>>>>> 20a49abf7a2b551471ca1167cdfd4bf77bb614f6
     customer_classification.classification_description AS 'Primary Industry Classification',
     customer_risk_rating.customer_risk_rating_type_description AS 'Assigned Rating/ECGD Status',
     customer_risk_parameter_value AS "Loss Given Default"
