@@ -46,14 +46,14 @@ WITH
             AND facility_party.change_type != 'D'
             AND facility.change_type != 'D'
     ),
-    unique_acbs_customer_names
+    fuzzy_unique_acbs_customer_names
     AS
     (
         SELECT
-            customer_name
+            cleaned_name
         FROM active_acbs_customers
-        GROUP BY customer_name
-        HAVING COUNT(customer_name) = 1
+        GROUP BY cleaned_name
+        HAVING COUNT(cleaned_name) = 1
     ),
     distinct_facility_and_party_types
     AS
@@ -96,13 +96,13 @@ WITH
     )
 
 SELECT *
-FROM unique_acbs_customer_names
+FROM fuzzy_unique_acbs_customer_names
     JOIN active_acbs_customers
-    ON unique_acbs_customer_names.customer_name = active_acbs_customers.customer_name
+    ON fuzzy_unique_acbs_customer_names.cleaned_name = active_acbs_customers.cleaned_name
     LEFT JOIN cleaned_names AS sf_cleaned_names
-    ON sf_cleaned_names.cleaned_name = active_acbs_customers.cleaned_name
-        AND sf_cleaned_names.source IN ('SalesForce', 'SalesforceLegacy')
+    ON sf_cleaned_names.customer_party_unique_reference_number = active_acbs_customers.customer_party_unique_reference_number
+        AND sf_cleaned_names.source IN ('SalesForce')
     JOIN distinct_facility_and_party_types
     ON active_acbs_customers.ods_key = distinct_facility_and_party_types.ods_key
-    WHERE active_acbs_customers.customer_party_unique_reference_number IS NULL
+    WHERE active_acbs_customers.customer_party_unique_reference_number IS NOT NULL
 ORDER BY active_acbs_customers.ods_key
