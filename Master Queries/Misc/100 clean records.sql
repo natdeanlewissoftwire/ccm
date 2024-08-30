@@ -47,7 +47,7 @@ SELECT TOP 100
     customer_classification_primind.classification_description AS 'Primary Industry',
     STRING_AGG(CONVERT(NVARCHAR(max), customer_classification_ind.classification_group_description), CHAR(10)) AS 'Industry Group',
     STRING_AGG(CONVERT(NVARCHAR(max), customer_classification_ind.classification_description), CHAR(10)) AS 'Industry',
-    -- customer_classification_indshare.classification_description AS 'Industry Share',
+    customer_classification_indshare.classification_description AS 'Industry Share',
     customer_x_classification__relationship_primind.customer_classification_relationship_weighting AS 'Industry Weighting',
     customer_classification_cit.classification_description AS 'Citizenship Class',
     customer_risk_rating.customer_risk_rating_type_description AS 'Assigned Rating/ECGD Status',
@@ -62,18 +62,22 @@ FROM [ODS].[dbo].[customer] customer
         AND facility_party.facility_ods_key = facility.ods_key
     JOIN [ODS].[dbo].[customer_x_classification__relationship] customer_x_classification__relationship_primind
         ON customer_x_classification__relationship_primind.customer_ods_key = customer.ods_key
+        AND customer_x_classification__relationship_primind.ods_key LIKE 'PRIMIND#%'
     JOIN [ODS].[dbo].[customer_classification] customer_classification_primind
         ON customer_x_classification__relationship_primind.classification_ods_key = customer_classification_primind.ods_key
     JOIN [ODS].[dbo].[customer_x_classification__relationship] customer_x_classification__relationship_ind
         ON customer_x_classification__relationship_ind.customer_ods_key = customer.ods_key
-    JOIN [ODS].[dbo].[customer_classification] customer_classification_ind
+        AND customer_x_classification__relationship_ind.ods_key LIKE 'IND#%'
+    LEFT JOIN [ODS].[dbo].[customer_classification] customer_classification_ind
         ON customer_x_classification__relationship_ind.classification_ods_key = customer_classification_ind.ods_key
-    -- JOIN [ODS].[dbo].[customer_x_classification__relationship] customer_x_classification__relationship_indshare
-    --     ON customer_x_classification__relationship_indshare.customer_ods_key = customer.ods_key
-    -- JOIN [ODS].[dbo].[customer_classification] customer_classification_indshare
-    --     ON customer_x_classification__relationship_indshare.classification_ods_key = customer_classification_indshare.ods_key
+    LEFT JOIN [ODS].[dbo].[customer_x_classification__relationship] customer_x_classification__relationship_indshare
+        ON customer_x_classification__relationship_indshare.customer_ods_key = customer.ods_key
+        AND customer_x_classification__relationship_indshare.ods_key LIKE 'INDSHARE#%'
+    LEFT JOIN [ODS].[dbo].[customer_classification] customer_classification_indshare
+        ON customer_x_classification__relationship_indshare.classification_ods_key = customer_classification_indshare.ods_key
     JOIN [ODS].[dbo].[customer_x_classification__relationship] customer_x_classification__relationship_cit
         ON customer_x_classification__relationship_cit.customer_ods_key = customer.ods_key
+        AND customer_x_classification__relationship_cit.ods_key LIKE 'CITIZENCLASS#%'
     JOIN [ODS].[dbo].[customer_classification] customer_classification_cit
         ON customer_x_classification__relationship_cit.classification_ods_key = customer_classification_cit.ods_key
     JOIN [ODS].[dbo].[customer_risk_rating]
@@ -120,10 +124,6 @@ WHERE customer.source = 'ACBS'
     AND customer.customer_party_unique_reference_number IS NOT NULL
     AND customer.customer_type_description IS NOT NULL
     AND customer.customer_watch_monitor_flag IS NOT NULL
-    AND customer_x_classification__relationship_primind.ods_key LIKE 'PRIMIND#%'
-    AND customer_x_classification__relationship_ind.ods_key LIKE 'IND#%'
-    -- AND customer_x_classification__relationship_indshare.ods_key LIKE 'INDSHARE#%'
-    AND customer_x_classification__relationship_cit.ods_key LIKE 'CITIZENCLASS#%'
     AND customer_risk_rating.customer_credit_risk_rating_description IS NOT NULL
     AND customer_x_classification__relationship_primind.customer_classification_relationship_type IS NOT NULL
     AND customer_x_classification__relationship_ind.customer_classification_relationship_type IS NOT NULL
@@ -139,16 +139,12 @@ GROUP BY
     customer.customer_watch_monitor_datetime,
     customer_classification_primind.classification_group_description,
     customer_classification_primind.classification_description,
-    -- customer_classification_indshare.classification_description,
+    customer_classification_indshare.classification_description,
     customer_classification_cit.classification_description,
     customer_risk_rating.customer_credit_risk_rating_description,
     customer_risk_rating.customer_risk_rating_type_datetime,
     customer_risk_rating.customer_credit_risk_rating_datetime,
-    customer_x_classification__relationship_primind.customer_classification_relationship_type,
-    customer_x_classification__relationship_ind.customer_classification_relationship_type,
-    -- customer_x_classification__relationship_indshare.customer_classification_relationship_type,
     customer_x_classification__relationship_primind.customer_classification_relationship_weighting,
-    customer_x_classification__relationship_cit.customer_classification_relationship_type,
     customer_risk_rating.customer_risk_rating_type_description,
     cleaned_names.cleaned_name,
     customer_risk_parameter_pod.customer_risk_parameter_value,
