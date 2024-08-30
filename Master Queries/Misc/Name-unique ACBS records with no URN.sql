@@ -100,7 +100,7 @@ FROM unique_acbs_customer_names
     JOIN active_acbs_customers
     ON unique_acbs_customer_names.customer_name = active_acbs_customers.customer_name
     LEFT JOIN cleaned_names AS sf_cleaned_names
-    ON sf_cleaned_names.cleaned_name = active_acbs_customers.cleaned_name
+    ON (CHARINDEX(sf_cleaned_names.cleaned_name, active_acbs_customers.cleaned_name) > 0 OR CHARINDEX(active_acbs_customers.cleaned_name, sf_cleaned_names.cleaned_name) > 0)
         AND sf_cleaned_names.source IN ('SalesForce', 'SalesforceLegacy')
     JOIN distinct_facility_and_party_types
     ON active_acbs_customers.ods_key = distinct_facility_and_party_types.ods_key
