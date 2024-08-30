@@ -51,8 +51,8 @@ SELECT TOP 100
     customer_x_classification__relationship_primind.customer_classification_relationship_weighting AS 'Industry Weighting',
     customer_classification_cit.classification_description AS 'Citizenship Class',
     customer_risk_rating.customer_risk_rating_type_description AS 'Assigned Rating/ECGD Status',
-    customer_risk_parameter_lgd.customer_risk_parameter_value AS "Loss Given Default",
-    customer_risk_parameter_pod.customer_risk_parameter_value AS "Probability of Default"
+    customer_risk_parameter_lgd.customer_risk_parameter_value AS 'Loss Given Default',
+    customer_risk_parameter_pod.customer_risk_parameter_value AS 'Probability of Default'
 FROM [ODS].[dbo].[customer] customer
     JOIN [ODS].[dbo].[facility_party] facility_party
     ON customer.source = facility_party.source
