@@ -25,6 +25,7 @@ WITH
             AS cleaned_name
         FROM [ODS].[dbo].[customer]
         WHERE customer_party_unique_reference_number IS NOT NULL
+        AND source = 'ACBS'
     )
 SELECT TOP 100
     customer.customer_name AS 'Name 1',
@@ -43,10 +44,10 @@ SELECT TOP 100
     customer_risk_rating.customer_credit_risk_rating_description AS 'Credit Risk Rating',
     CAST(customer_risk_rating.customer_risk_rating_type_datetime AS DATE) AS 'Credit Risk Rating Date',
     CAST(customer_risk_rating.customer_credit_risk_rating_datetime AS DATE) AS 'Assigned Risk Rating Date',
-    customer_classification_primind.classification_group_description AS 'Primary Industry Group',
-    customer_classification_primind.classification_description AS 'Primary Industry',
-    STRING_AGG(CONVERT(NVARCHAR(max), customer_classification_ind.classification_group_description), CHAR(10)) AS 'Industry Group',
-    STRING_AGG(CONVERT(NVARCHAR(max), customer_classification_ind.classification_description), CHAR(10)) AS 'Industry',
+    STRING_AGG(CAST(customer_classification_primind.classification_group_description AS NVARCHAR(MAX)), CHAR(10)) AS 'Primary Industry Group',
+    STRING_AGG(CAST(customer_classification_primind.classification_description AS NVARCHAR(MAX)), CHAR(10)) AS 'Primary Industry',
+    STRING_AGG(CAST(customer_classification_ind.classification_group_description AS NVARCHAR(MAX)), CHAR(10)) AS 'Industry Group',
+    STRING_AGG(CAST(customer_classification_ind.classification_description AS NVARCHAR(MAX)), CHAR(10)) AS 'Industry',
     customer_classification_indshare.classification_description AS 'Industry Share',
     customer_x_classification__relationship_primind.customer_classification_relationship_weighting AS 'Industry Weighting',
     customer_classification_cit.classification_description AS 'Citizenship Class',
@@ -138,8 +139,6 @@ GROUP BY
     customer.customer_type_description,
     customer.customer_watch_monitor_flag,
     customer.customer_watch_monitor_datetime,
-    customer_classification_primind.classification_group_description,
-    customer_classification_primind.classification_description,
     customer_classification_indshare.classification_description,
     customer_classification_cit.classification_description,
     customer_risk_rating.customer_credit_risk_rating_description,
@@ -149,4 +148,6 @@ GROUP BY
     customer_risk_rating.customer_risk_rating_type_description,
     customer_risk_parameter_pod.customer_risk_parameter_value,
     customer_risk_parameter_lgd.customer_risk_parameter_value
-HAVING COUNT(cleaned_names.cleaned_name) = 1
+
+    -- Comment out this HAVING clause to return all records with conflicting values for certain fields, not just unique rows
+    HAVING COUNT(cleaned_names.cleaned_name) = 1
