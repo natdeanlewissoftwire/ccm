@@ -96,7 +96,12 @@ WITH
     (
         SELECT
             all_facility_and_party_types.ods_key,
+            STRING_AGG(CAST(country_ods_key AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_country_ods_keys,
+            STRING_AGG(CAST(country_name AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_country_names,
+            STRING_AGG(CAST(facility_type_code AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_codes,
             STRING_AGG(CAST(facility_type_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_types,
+            COUNT(facility_type_description) AS facility_count,
+            SUM(CASE WHEN facility_type_description LIKE '%PARIS CLUB%' THEN 1 ELSE 0 END) AS paris_club_facility_count,
             STRING_AGG(CAST(facility_party_role_type_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_party_role_types
         FROM (
             SELECT
@@ -105,6 +110,9 @@ WITH
                 acbs_cleaned_names_linked_to_active_facilities.customer_code,
                 acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number,
                 acbs_cleaned_names_linked_to_active_facilities.customer_name,
+                facility.country_ods_key,
+                country.country_name,
+                facility.facility_type_code,
                 facility.facility_type_description,
                 facility_party.facility_party_role_type_description
             FROM acbs_cleaned_names_linked_to_active_facilities
@@ -114,12 +122,17 @@ WITH
                 JOIN [ODS].[dbo].[facility] facility
                 ON facility_party.source = facility.source
                     AND facility_party.facility_ods_key = facility.ods_key
+                LEFT JOIN [ODS].[dbo].[country] country
+                    ON country.ods_key = facility.country_ods_key
             GROUP BY 
         acbs_cleaned_names_linked_to_active_facilities.ods_key, 
         acbs_cleaned_names_linked_to_active_facilities.source, 
         acbs_cleaned_names_linked_to_active_facilities.customer_code, 
         acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number, 
         acbs_cleaned_names_linked_to_active_facilities.customer_name, 
+        facility.country_ods_key,
+        country.country_name,
+        facility.facility_type_code,
         facility.facility_type_description,
         facility_party.facility_party_role_type_description
         ) as all_facility_and_party_types
@@ -195,9 +208,12 @@ ELSE 'No'
 ELSE 'No'
     END
     AS 'URN-Matching Salesforce URN is only present in Salesforce Legacy Data',
+    distinct_facility_and_party_types.customer_facility_country_ods_keys as 'Customer facility country ods keys',
+    distinct_facility_and_party_types.customer_facility_country_names as 'Customer facility country names',
+    distinct_facility_and_party_types.customer_facility_codes as 'Customer facility codes',
     distinct_facility_and_party_types.customer_facility_types as 'Customer facility types',
-    distinct_facility_and_party_types.customer_facility_party_role_types as 'Customer facility party role types'
-
+    distinct_facility_and_party_types.customer_facility_party_role_types as 'Customer facility party role types',
+    customer_address_country as 'Customer address country'
 
 FROM distinct_acbs_cleaned_names_linked_to_active_facilities
     -- JOIN acbs_cleaned_names_linked_to_active_facilities
@@ -208,7 +224,13 @@ FROM distinct_acbs_cleaned_names_linked_to_active_facilities
     ON acbs_cleaned_names.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
     LEFT JOIN distinct_facility_and_party_types
     ON acbs_cleaned_names.ods_key = distinct_facility_and_party_types.ods_key
+    LEFT JOIN customer_address
+    ON customer_address.customer_ods_key = acbs_cleaned_names.ods_key
+
+
+-- ONLY Paris club:
+WHERE facility_count = paris_club_facility_count
+
 
 ORDER BY distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name
 
---  2848 active ACBS records -> 3764 total results with dupes for multi SF matches on URN and non-active ACBS records
