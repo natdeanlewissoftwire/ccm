@@ -36,7 +36,7 @@ WITH
             customer_code,
             ods_key
         FROM (
-            SELECT DISTINCT
+            SELECT
                 cleaned_names.source,
                 cleaned_names.customer_code,
                 cleaned_names.customer_party_unique_reference_number,
@@ -52,7 +52,7 @@ WITH
     acbs_cleaned_names_linked_to_active_facilities
     AS
     (
-        SELECT DISTINCT
+        SELECT
             acbs_cleaned_names.source,
             acbs_cleaned_names.customer_name,
             acbs_cleaned_names.customer_code,
@@ -79,7 +79,7 @@ WITH
     sf_customers
     AS
     (
-        SELECT DISTINCT
+        SELECT
             customer.source,
             customer.customer_code,
             customer.customer_party_unique_reference_number,
