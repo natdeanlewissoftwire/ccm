@@ -241,8 +241,8 @@ FROM distinct_acbs_cleaned_names_linked_to_active_facilities
     ON customer_address.customer_ods_key = acbs_cleaned_names.ods_key
 
 
--- ONLY Paris club:
-WHERE facility_count = paris_club_facility_count
+-- NOT ONLY Paris club:
+WHERE facility_count != paris_club_facility_count
 
 
 ORDER BY distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name
