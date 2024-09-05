@@ -2,7 +2,7 @@ WITH
     cleaned_names
     AS
     (
-        SELECT
+        SELECT DISTINCT
             source,
             customer_name,
             customer_code,
