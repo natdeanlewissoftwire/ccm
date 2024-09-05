@@ -103,7 +103,7 @@ WITH
         acbs_cleaned_names_linked_to_active_facilities.customer_name, 
         facility.facility_type_description,
         facility_party.facility_party_role_type_description
-        ) as all_facility_and_party_types
+        ) AS all_facility_and_party_types
         GROUP BY 
             ods_key,
             source, 

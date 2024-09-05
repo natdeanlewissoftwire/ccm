@@ -146,7 +146,7 @@ WITH
         facility_party.facility_party_role_type_description,
         facility_classification.classification_group_description,
         facility_classification.classification_description
-        ) as all_facility_and_party_types
+        ) AS all_facility_and_party_types
         GROUP BY 
             ods_key,
             source, 
@@ -219,14 +219,14 @@ ELSE 'No'
 ELSE 'No'
     END
     AS 'URN-Matching Salesforce URN is only present in Salesforce Legacy Data',
-    distinct_facility_and_party_types.customer_facility_country_ods_keys as 'Customer facility country ods keys',
-    distinct_facility_and_party_types.customer_facility_country_names as 'Customer facility country names',
-    distinct_facility_and_party_types.customer_facility_codes as 'Customer facility codes',
-    distinct_facility_and_party_types.customer_facility_types as 'Customer facility types',
-    distinct_facility_and_party_types.customer_facility_party_role_types as 'Customer facility party role types',
-    customer_address_country as 'Customer address country',
-    customer_facility_classification_group_descriptions as 'Customer facility classification group descriptions',
-    customer_facility_classification_descriptions as 'Customer facility classification descriptions'
+    distinct_facility_and_party_types.customer_facility_country_ods_keys AS 'Customer facility country ods keys',
+    distinct_facility_and_party_types.customer_facility_country_names AS 'Customer facility country names',
+    distinct_facility_and_party_types.customer_facility_codes AS 'Customer facility codes',
+    distinct_facility_and_party_types.customer_facility_types AS 'Customer facility types',
+    distinct_facility_and_party_types.customer_facility_party_role_types AS 'Customer facility party role types',
+    customer_address_country AS 'Customer address country',
+    customer_facility_classification_group_descriptions AS 'Customer facility classification group descriptions',
+    customer_facility_classification_descriptions AS 'Customer facility classification descriptions'
 
 FROM distinct_acbs_cleaned_names_linked_to_active_facilities
     -- JOIN acbs_cleaned_names_linked_to_active_facilities

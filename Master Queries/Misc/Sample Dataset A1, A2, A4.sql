@@ -116,7 +116,7 @@ WITH
         acbs_cleaned_names_linked_to_active_facilities.customer_name, 
         facility.facility_type_description,
         facility_party.facility_party_role_type_description
-        ) as all_facility_and_party_types
+        ) AS all_facility_and_party_types
         GROUP BY 
             ods_key,
             source, 
@@ -180,8 +180,8 @@ ELSE 'No'
 ELSE 'No'
     END
     AS 'URN-Matching Salesforce URN is only present in Salesforce Legacy Data',
-    distinct_facility_and_party_types.customer_facility_types as 'Customer facility types',
-    distinct_facility_and_party_types.customer_facility_party_role_types as 'Customer facility party role types'
+    distinct_facility_and_party_types.customer_facility_types AS 'Customer facility types',
+    distinct_facility_and_party_types.customer_facility_party_role_types AS 'Customer facility party role types'
 
 FROM acbs_cleaned_names_linked_to_active_facilities
     LEFT JOIN acbs_cleaned_names
