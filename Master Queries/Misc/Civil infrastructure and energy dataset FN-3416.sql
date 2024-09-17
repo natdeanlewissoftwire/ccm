@@ -134,7 +134,9 @@ WITH
                 ON facility_x_classification__relationship.facility_ods_key = facility.ods_key
                 LEFT JOIN facility_classification
                 ON facility_x_classification__relationship.classification_ods_key = facility_classification.ods_key
-
+            WHERE facility.facility_status_description = 'ACTIVE ACCOUNT'
+                AND facility_party.change_type != 'D'
+                AND facility.change_type != 'D'
             GROUP BY 
         acbs_cleaned_names_linked_to_active_facilities.ods_key, 
         acbs_cleaned_names_linked_to_active_facilities.source, 
@@ -149,7 +151,7 @@ WITH
         facility_party.facility_party_role_type_description,
         facility_classification.classification_group_description,
         facility_classification.classification_description
-        ) AS all_facility_and_party_types
+    ) AS all_facility_and_party_types
         GROUP BY 
             ods_key,
             source, 

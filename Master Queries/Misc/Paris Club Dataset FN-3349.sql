@@ -125,7 +125,10 @@ WITH
                 ON facility_party.source = facility.source
                     AND facility_party.facility_ods_key = facility.ods_key
                 JOIN [ODS].[dbo].[country] country
-                    ON country.ods_key = facility.country_ods_key
+                ON country.ods_key = facility.country_ods_key
+            WHERE facility.facility_status_description = 'ACTIVE ACCOUNT'
+                AND facility_party.change_type != 'D'
+                AND facility.change_type != 'D'
             GROUP BY 
         acbs_cleaned_names_linked_to_active_facilities.ods_key, 
         acbs_cleaned_names_linked_to_active_facilities.source, 
@@ -152,8 +155,8 @@ SELECT distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name AS '
     CASE
     WHEN EXISTS (
         SELECT *
-        FROM acbs_cleaned_names_linked_to_active_facilities
-        WHERE acbs_cleaned_names_linked_to_active_facilities.ods_key = acbs_cleaned_names.ods_key
+    FROM acbs_cleaned_names_linked_to_active_facilities
+    WHERE acbs_cleaned_names_linked_to_active_facilities.ods_key = acbs_cleaned_names.ods_key
     ) THEN 'Yes'
     ELSE 'No'
     END
