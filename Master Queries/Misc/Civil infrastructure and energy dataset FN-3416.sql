@@ -98,7 +98,8 @@ WITH
             all_facility_and_party_types.ods_key,
             STRING_AGG(CAST(country_ods_key AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_country_ods_keys,
             STRING_AGG(CAST(country_name AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_country_names,
-            STRING_AGG(CAST(facility_type_code AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_codes,
+            STRING_AGG(CAST(facility_code AS NVARCHAR(MAX)), CHAR(10)) AS facility_codes,
+            STRING_AGG(CAST(facility_type_code AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_type_codes,
             STRING_AGG(CAST(facility_type_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_types,
             COUNT(facility_type_description) AS facility_count,
             SUM(CASE WHEN facility_type_description LIKE '%PARIS CLUB%' THEN 1 ELSE 0 END) AS paris_club_facility_count,
@@ -114,6 +115,7 @@ WITH
                 acbs_cleaned_names_linked_to_active_facilities.customer_name,
                 facility.country_ods_key,
                 country.country_name,
+                facility.facility_code,
                 facility.facility_type_code,
                 facility.facility_type_description,
                 facility_party.facility_party_role_type_description,
@@ -141,6 +143,7 @@ WITH
         acbs_cleaned_names_linked_to_active_facilities.customer_name, 
         facility.country_ods_key,
         country.country_name,
+        facility.facility_code,
         facility.facility_type_code,
         facility.facility_type_description,
         facility_party.facility_party_role_type_description,
@@ -221,12 +224,13 @@ ELSE 'No'
     AS 'URN-Matching Salesforce URN is only present in Salesforce Legacy Data',
     distinct_facility_and_party_types.customer_facility_country_ods_keys AS 'Customer facility country ods keys',
     distinct_facility_and_party_types.customer_facility_country_names AS 'Customer facility country names',
-    distinct_facility_and_party_types.customer_facility_codes AS 'Customer facility codes',
+    distinct_facility_and_party_types.customer_facility_type_codes AS 'Customer facility type codes',
     distinct_facility_and_party_types.customer_facility_types AS 'Customer facility types',
     distinct_facility_and_party_types.customer_facility_party_role_types AS 'Customer facility party role types',
     customer_address_country AS 'Customer address country',
     customer_facility_classification_group_descriptions AS 'Customer facility classification group descriptions',
-    customer_facility_classification_descriptions AS 'Customer facility classification descriptions'
+    customer_facility_classification_descriptions AS 'Customer facility classification descriptions',
+    distinct_facility_and_party_types.facility_codes AS 'Facility codes'
 
 FROM distinct_acbs_cleaned_names_linked_to_active_facilities
     -- JOIN acbs_cleaned_names_linked_to_active_facilities
