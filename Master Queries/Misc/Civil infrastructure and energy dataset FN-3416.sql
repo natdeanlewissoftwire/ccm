@@ -105,7 +105,7 @@ WITH
             SUM(CASE WHEN facility_type_description LIKE '%PARIS CLUB%' THEN 1 ELSE 0 END) AS paris_club_facility_count,
             STRING_AGG(CAST(facility_party_role_type_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_party_role_types,
             STRING_AGG(CAST(classification_group_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_classification_group_descriptions,
-            STRING_AGG(CAST(classification_group_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_classification_descriptions
+            STRING_AGG(CAST(classification_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_classification_descriptions
         FROM (
             SELECT
                 acbs_cleaned_names_linked_to_active_facilities.ods_key,
