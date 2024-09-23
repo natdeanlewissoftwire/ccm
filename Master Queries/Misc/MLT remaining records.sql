@@ -76,20 +76,21 @@ WITH
         SELECT DISTINCT cleaned_name
         FROM acbs_cleaned_names_linked_to_active_facilities
     ),
-    sf_customers
+    sf_cleaned_names
     AS
     (
         SELECT DISTINCT
-            customer.source,
-            customer.customer_code,
-            customer.customer_party_unique_reference_number,
-            customer.customer_name
-        FROM [ODS].[dbo].[customer] customer
-        WHERE customer.source IN ('SalesForce', 'SalesforceLegacy')
+            cleaned_names.source,
+            cleaned_names.customer_code,
+            cleaned_names.customer_party_unique_reference_number,
+            cleaned_names.customer_name,
+            cleaned_names.cleaned_name
+        FROM cleaned_names
+        WHERE cleaned_names.source IN ('SalesForce', 'SalesforceLegacy')
             --  exclude UKEF records
-            AND customer.customer_code != '00000000'
+            AND cleaned_names.customer_code != '00000000'
             --  exclude deleted records
-            AND customer.change_type != 'D'
+            AND cleaned_names.change_type != 'D'
     ),
     distinct_facility_and_party_types
     AS
@@ -204,26 +205,26 @@ ELSE 'No'
     -- acbs_cleaned_names.customer_name AS 'Fuzzy-Matching ACBS Customer Name',
     -- acbs_cleaned_names.customer_code AS 'Fuzzy-Matching ACBS Customer Code',
     -- acbs_cleaned_names.customer_party_unique_reference_number  AS 'Fuzzy-Matching ACBS Customer URN'
-    sf_customers.customer_party_unique_reference_number AS 'URN-Matching Salesforce Customer URN',
-    sf_customers.customer_name AS 'URN-Matching Salesforce Customer Name',
-    sf_customers.customer_code AS 'URN-Matching Salesforce Customer Code',
+    sf_cleaned_names.customer_party_unique_reference_number AS 'URN/Fuzzy Name-Matching Salesforce Customer URN',
+    sf_cleaned_names.customer_name AS 'URN/Fuzzy Name-Matching Salesforce Customer Name',
+    sf_cleaned_names.customer_code AS 'URN/Fuzzy Name-Matching Salesforce Customer Code',
     CASE
-        WHEN sf_customers.customer_party_unique_reference_number IS NOT NULL
+        WHEN sf_cleaned_names.customer_party_unique_reference_number IS NOT NULL
         AND EXISTS (
     SELECT *
         FROM [ODS].[dbo].[customer] salesforce_legacy
         WHERE salesforce_legacy.source = 'SalesforceLegacy'
-            AND salesforce_legacy.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
+            AND salesforce_legacy.customer_party_unique_reference_number = sf_cleaned_names.customer_party_unique_reference_number
 )
         AND NOT EXISTS (
     SELECT *
         FROM [ODS].[dbo].[customer] salesforce
         WHERE salesforce.source = 'SalesForce'
-            AND salesforce.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
+            AND salesforce.customer_party_unique_reference_number = sf_cleaned_names.customer_party_unique_reference_number
 ) THEN 'Yes'
 ELSE 'No'
     END
-    AS 'URN-Matching Salesforce URN is only present in Salesforce Legacy Data',
+    AS 'URN/Fuzzy Name-Matching Salesforce URN is only present in Salesforce Legacy Data',
     distinct_facility_and_party_types.customer_facility_country_ods_keys AS 'Customer facility country ods keys',
     distinct_facility_and_party_types.customer_facility_country_names AS 'Customer facility country names',
     distinct_facility_and_party_types.customer_facility_type_codes AS 'Customer facility type codes',
@@ -239,36 +240,64 @@ FROM distinct_acbs_cleaned_names_linked_to_active_facilities
     -- ON distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name = acbs_cleaned_names_linked_to_active_facilities.cleaned_name
     LEFT JOIN acbs_cleaned_names
     ON distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name = acbs_cleaned_names.cleaned_name
-    LEFT JOIN sf_customers
-    ON acbs_cleaned_names.customer_party_unique_reference_number = sf_customers.customer_party_unique_reference_number
+    LEFT JOIN sf_cleaned_names
+    ON acbs_cleaned_names.customer_party_unique_reference_number = sf_cleaned_names.customer_party_unique_reference_number
+    OR acbs_cleaned_names.cleaned_name = sf_cleaned_names.cleaned_name
     LEFT JOIN distinct_facility_and_party_types
     ON acbs_cleaned_names.ods_key = distinct_facility_and_party_types.ods_key
     LEFT JOIN customer_address
     ON customer_address.customer_ods_key = acbs_cleaned_names.ods_key
 
 WHERE distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name IN (
- ' CLASSIC FASHION APPAREL INDUSTRY ',
- ' COLAS AFRIQUE SA ',
- ' CREDIT INDUSTRIEL ET COMMERCIAL ',
- ' DNEX DAGANG NEXCHANGE BHD ',
- ' DOTT SERVICES ',
- ' FLUOR ',
- ' JAGUAR LAND ROVER AUTOMOTIVE ',
- ' JFD ',
- ' JOHNSON MATTHEY ',
- ' MAN TRUCK AND BUS UK ',
- ' NORTHSTAR TRADE FINANCE ',
- ' PUBLIC INVESTMENT FUND ',
- ' RAIFFEISEN BANK INTERNATIONAL AG ',
- ' RAMDASS TRANSPORT ',
- ' RAUTOMEAD ',
- ' ROYAL IHC ',
- ' SADARA CHEMICAL ',
- ' SANTANDER FINANCIAL SERVICES ',
- ' SANTANDER UK ',
- ' SEASIA NECTAR PORT SERVICES ',
- ' SKANDINAVISKA ENSKILDA BANKEN AB ',
- ' SUBSEA 7 INTERNATIONAL CONTRACTING ',
- ' VITOL UPSTREAM GHANA ')
+' CREDIT INDUSTRIEL ET COMMERCIAL ',
+' NATIXIS ',
+' SANTANDER FINANCIAL SERVICES ',
+' NORTHSTAR TRADE FINANCE ',
+' RAIFFEISEN BANK INTERNATIONAL AG ',
+' SANTANDER UK ',
+' SADARA CHEMICAL ',
+' VITOL UPSTREAM GHANA ',
+' SUBSEA 7 INTERNATIONAL CONTRACTING ',
+' PUBLIC INVESTMENT FUND ',
+' SEASIA NECTAR PORT SERVICES ',
+' JAGUAR LAND ROVER AUTOMOTIVE ',
+' DOTT SERVICES ',
+' FLUOR ',
+' SKANDINAVISKA ENSKILDA BANKEN AB ',
+' RAMDASS TRANSPORT ',
+' DNEX DAGANG NEXCHANGE BHD ',
+' JOHNSON MATTHEY ',
+' JFD ',
+' MAN TRUCK AND BUS UK ',
+' RAUTOMEAD ',
+' ROYAL IHC ',
+' COLAS AFRIQUE SA ',
+' CLASSIC FASHION APPAREL INDUSTRY ')
 
-ORDER BY distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name
+-- WHERE acbs_cleaned_names.customer_code IN (
+--  00000529,
+-- 00000876,
+-- 00002641,
+-- 00002839,
+-- 00004202,
+-- 00201221,
+-- 00206528,
+-- 00217245,
+-- 00226853,
+-- 00231946,
+-- 00236814,
+-- 00242348,
+-- 00261484,
+-- 00262885,
+-- 00269846,
+-- 00274994,
+-- 00277011,
+-- 00280276,
+-- 00284273,
+-- 00285812,
+-- 00286253,
+-- 00286291,
+-- 00287304,
+-- 00289037)
+
+ORDER BY acbs_cleaned_names.customer_code
