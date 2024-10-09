@@ -49,7 +49,7 @@ WITH
                 AND cleaned_names.change_type != 'D'
         ) AS acbs_customers
     ),
-    acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY
+    acbs_cleaned_names_linked_to_active_facilities
     AS
     (
         SELECT DISTINCT
@@ -69,13 +69,14 @@ WITH
         WHERE facility.facility_status_description = 'ACTIVE ACCOUNT'
             AND facility_party.change_type != 'D'
             AND facility.change_type != 'D'
-            AND facility.facility_expiration_datetime < GETDATE()
+            AND (facility.facility_expiration_datetime >= GETDATE() OR facility.facility_expiration_datetime IS NULL)
+            -- AND facility.facility_current_value != 0
     ),
     distinct_acbs_cleaned_names_linked_to_active_facilities
     AS
     (
         SELECT DISTINCT cleaned_name
-        FROM acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY
+        FROM acbs_cleaned_names_linked_to_active_facilities
     ),
     sf_customers
     AS
@@ -109,11 +110,11 @@ WITH
             STRING_AGG(CAST(classification_description AS NVARCHAR(MAX)), CHAR(10)) AS customer_facility_classification_descriptions
         FROM (
             SELECT
-                acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.ods_key,
-                acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.source,
-                acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.customer_code,
-                acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.customer_party_unique_reference_number,
-                acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.customer_name,
+                acbs_cleaned_names_linked_to_active_facilities.ods_key,
+                acbs_cleaned_names_linked_to_active_facilities.source,
+                acbs_cleaned_names_linked_to_active_facilities.customer_code,
+                acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number,
+                acbs_cleaned_names_linked_to_active_facilities.customer_name,
                 facility.country_ods_key,
                 country.country_name,
                 facility.facility_code,
@@ -122,10 +123,10 @@ WITH
                 facility_party.facility_party_role_type_description,
                 facility_classification.classification_group_description,
                 facility_classification.classification_description
-            FROM acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY
+            FROM acbs_cleaned_names_linked_to_active_facilities
                 JOIN [ODS].[dbo].[facility_party] facility_party
-                ON acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.source = facility_party.source
-                    AND acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.ods_key = facility_party.customer_ods_key
+                ON acbs_cleaned_names_linked_to_active_facilities.source = facility_party.source
+                    AND acbs_cleaned_names_linked_to_active_facilities.ods_key = facility_party.customer_ods_key
                 JOIN [ODS].[dbo].[facility] facility
                 ON facility_party.source = facility.source
                     AND facility_party.facility_ods_key = facility.ods_key
@@ -139,11 +140,11 @@ WITH
                 AND facility_party.change_type != 'D'
                 AND facility.change_type != 'D'
             GROUP BY 
-        acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.ods_key, 
-        acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.source, 
-        acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.customer_code, 
-        acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.customer_party_unique_reference_number, 
-        acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.customer_name, 
+        acbs_cleaned_names_linked_to_active_facilities.ods_key, 
+        acbs_cleaned_names_linked_to_active_facilities.source, 
+        acbs_cleaned_names_linked_to_active_facilities.customer_code, 
+        acbs_cleaned_names_linked_to_active_facilities.customer_party_unique_reference_number, 
+        acbs_cleaned_names_linked_to_active_facilities.customer_name, 
         facility.country_ods_key,
         country.country_name,
         facility.facility_code,
@@ -166,8 +167,8 @@ SELECT distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name AS '
     CASE
     WHEN EXISTS (
         SELECT *
-    FROM acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY
-    WHERE acbs_cleaned_names_linked_to_active_facilities_EXPIRED_ONLY.ods_key = acbs_cleaned_names.ods_key
+    FROM acbs_cleaned_names_linked_to_active_facilities
+    WHERE acbs_cleaned_names_linked_to_active_facilities.ods_key = acbs_cleaned_names.ods_key
     ) THEN 'Yes'
     ELSE 'No'
     END
