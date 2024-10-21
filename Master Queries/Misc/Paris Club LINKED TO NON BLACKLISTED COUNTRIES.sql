@@ -69,8 +69,6 @@ WITH
         WHERE facility.facility_status_description = 'ACTIVE ACCOUNT'
             AND facility_party.change_type != 'D'
             AND facility.change_type != 'D'
-            -- AND (facility.facility_expiration_datetime >= GETDATE() OR facility.facility_expiration_datetime IS NULL)
-            -- AND facility.facility_current_value != 0
     ),
     distinct_acbs_cleaned_names_linked_to_active_facilities
     AS
@@ -139,6 +137,7 @@ WITH
             WHERE facility.facility_status_description = 'ACTIVE ACCOUNT'
                 AND facility_party.change_type != 'D'
                 AND facility.change_type != 'D'
+                AND country.country_iso_3a_code NOT IN ('NGA', 'SLE', 'BRA', 'EGY', 'ECU', 'IDN', 'KEN', 'SRB', 'SCG', 'XSR', 'SOM')
             GROUP BY 
         acbs_cleaned_names_linked_to_active_facilities.ods_key, 
         acbs_cleaned_names_linked_to_active_facilities.source, 
@@ -249,9 +248,8 @@ FROM distinct_acbs_cleaned_names_linked_to_active_facilities
     ON customer_address.customer_ods_key = acbs_cleaned_names.ods_key
 
 
--- NOT ONLY Paris club:
-WHERE facility_count != paris_club_facility_count
+-- Paris club:
+WHERE facility_count = paris_club_facility_count
 
 
 ORDER BY distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name
-
