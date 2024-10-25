@@ -1,13 +1,40 @@
-SELECT customer_code, customer_name, customer_party_unique_reference_number, MAX(facility_expiration_datetime) AS 'max facility_expiration_datetime'
-FROM customer
-    JOIN [ODS].[dbo].[facility_party] facility_party
+WITH customer_linked_to_g_codes AS (
+    SELECT
+    customer_code 
+FROM 
+    customer
+JOIN 
+    [ODS].[dbo].[facility_party] facility_party
     ON customer.source = facility_party.source
-        AND customer.ods_key = facility_party.customer_ods_key
-    JOIN [ODS].[dbo].[facility] facility
+    AND customer.ods_key = facility_party.customer_ods_key
+JOIN 
+    [ODS].[dbo].[facility] facility
     ON facility_party.source = facility.source
-        AND facility_party.facility_ods_key = facility.ods_key
-    AND customer.source = 'ACBS'
-WHERE facility.facility_code IN (
+    AND facility_party.facility_ods_key = facility.ods_key
+WHERE 
+    customer.source = 'ACBS'
+    AND facility_party.facility_party_role_type_code LIKE 'G%'
+)
+
+SELECT
+    customer_code, 
+    customer_name, 
+    customer_party_unique_reference_number, 
+    MAX(facility_expiration_datetime) AS 'max facility_expiration_datetime',
+    STRING_AGG(CAST(facility_party_role_type_code AS NVARCHAR(MAX)), CHAR(10)) AS 'facility_party_role_type_codes'
+FROM 
+    customer
+JOIN 
+    [ODS].[dbo].[facility_party] facility_party
+    ON customer.source = facility_party.source
+    AND customer.ods_key = facility_party.customer_ods_key
+JOIN 
+    [ODS].[dbo].[facility] facility
+    ON facility_party.source = facility.source
+    AND facility_party.facility_ods_key = facility.ods_key
+WHERE 
+    customer.source = 'ACBS'
+AND facility.facility_code IN (
 '0001055716',
 '0001057817',
 '0001057823',
@@ -1874,6 +1901,14 @@ WHERE facility.facility_code IN (
 '0020018612',
 '0020018613',
 '0020018614'
+)
+
+AND EXISTS (
+    SELECT 1
+    FROM customer_linked_to_g_codes
+    JOIN customer new_customer
+    ON new_customer.customer_code = customer_linked_to_g_codes.customer_code
+    WHERE customer_linked_to_g_codes.customer_code = customer.customer_code
 )
 
 GROUP BY customer_code, customer_party_unique_reference_number, customer_name
