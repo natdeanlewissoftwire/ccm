@@ -2342,19 +2342,5 @@ FROM distinct_acbs_cleaned_names_linked_to_active_facilities
     ON customer_address.customer_ods_key = acbs_cleaned_names.ods_key
 
 
-WHERE acbs_cleaned_names.ods_key IN (
-'00223864',
-'00278044',
-'00295458',
-'00296854',
-'00296892',
-'00296877',
-'00296911',
-'00296936',
-'00295579',
-'00296905'
-)
-
-
 ORDER BY distinct_acbs_cleaned_names_linked_to_active_facilities.cleaned_name
 
