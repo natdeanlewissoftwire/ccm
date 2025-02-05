@@ -27,7 +27,7 @@
 --         WHERE customer_party_unique_reference_number IS NOT NULL
 --         AND source = 'ACBS'
 --     )
-SELECT
+SELECT TOP 1
     customer.customer_name AS 'Name 1',
     customer.customer_party_unique_reference_number AS 'URN',
     sf_customer.customer_code AS 'Salesforce ID',
@@ -104,7 +104,7 @@ FROM [ODS].[dbo].[customer] customer
         AND sf_customer.customer_party_unique_reference_number = customer.customer_party_unique_reference_number
 WHERE customer.source = 'ACBS'
     AND sf_customer.source = 'SalesForce'
-    AND customer.customer_code in ('')
+    -- AND customer.customer_code in ('')
     -- AND facility.facility_status_description = 'ACTIVE ACCOUNT'
     --  exclude UKEF records
     -- AND customer.customer_code != '00000000'

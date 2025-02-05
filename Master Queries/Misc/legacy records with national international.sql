@@ -8,7 +8,6 @@ AS 'National/International',
 CASE
 WHEN customer_address_country IS NULL THEN NULL
 WHEN customer_address_country != 'UNITED KINGDOM' THEN customer_address_country
-ELSE customer_address_postcode
 END
 AS 'Sub-Region',
 NULL AS 'Party Validated',
